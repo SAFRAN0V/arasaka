@@ -5,25 +5,13 @@
 -- Android/iOS: usa token de instalacao persistente salvo pelo executor.
 -- ============================================================
 
-print("[ARASAKA DEBUG] 00 - loader iniciou")
-
-if not game:IsLoaded() then
-    print("[ARASAKA DEBUG] 01 - aguardando game.Loaded")
-    game.Loaded:Wait()
-end
-
-task.wait(1)
-print("[ARASAKA DEBUG] 02 - jogo carregado")
-
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
-local Player = Players.LocalPlayer or Players.PlayerAdded:Wait()
-print("[ARASAKA DEBUG] 03 - LocalPlayer:", Player and Player.Name)
+local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
-print("[ARASAKA DEBUG] 04 - PlayerGui OK")
 local UID = tostring(Player.UserId)
 
 local API = "https://chatprivado-cwu3.onrender.com"
@@ -83,8 +71,6 @@ local function detectPlatform()
 end
 
 local PLATFORM = detectPlatform()
-print("[ARASAKA DEBUG] 05 - plataforma:", PLATFORM)
-print("[ARASAKA DEBUG] 06 - UID:", UID, "VERSION:", VERSION)
 
 local function storageAvailable()
     return type(readfile)=="function" and type(writefile)=="function"
@@ -94,3 +80,204 @@ local function saveDevice(state)
     if not storageAvailable() then return false,"Este executor nao oferece readfile/writefile para salvar a instalacao." end
     if type(makefolder)=="function" then pcall(function() makefolder(DEVICE_DIR) end) end
     local ok, raw = pcall(function() return HttpService:JSONEncode(state) end)
+    if not ok then return false,"Falha ao serializar dispositivo." end
+    local wok, werr = pcall(function() writefile(DEVICE_FILE, raw) end)
+    if not wok then return false,"Falha ao salvar dispositivo: "..tostring(werr) end
+    return true
+end
+
+local function readDeviceFile(path)
+    local exists = false
+    if type(isfile) == "function" then
+        pcall(function() exists = isfile(path) end)
+    else
+        local ok = pcall(function() readfile(path) end)
+        exists = ok
+    end
+    if not exists then return nil end
+
+    local ok, raw = pcall(function() return readfile(path) end)
+    if not ok or type(raw) ~= "string" then return nil end
+
+    local dok, decoded = pcall(function() return HttpService:JSONDecode(raw) end)
+    if not dok or type(decoded) ~= "table" then return nil end
+    if tostring(decoded.uid or "") ~= UID or type(decoded.deviceId) ~= "string" then return nil end
+
+    decoded.platform = PLATFORM
+    return decoded
+end
+
+local function loadDevice()
+    local state = {uid=UID,platform=PLATFORM,deviceId=HttpService:GenerateGUID(false),installToken=nil}
+    if not storageAvailable() then return state,false end
+
+    -- V6 MULTI-ACCOUNT: cada UID possui seu proprio device/installToken.
+    local perUser = readDeviceFile(DEVICE_FILE)
+    if perUser then
+        return perUser,true
+    end
+
+    -- Migracao transparente do loader antigo: se device.json pertencer a
+    -- esta conta, copia para device_<UID>.json sem perder o cadastro.
+    local legacy = readDeviceFile(LEGACY_DEVICE_FILE)
+    if legacy then
+        state = legacy
+        pcall(function() saveDevice(state) end)
+    end
+
+    return state,true
+end
+
+local Device, HAS_STORAGE = loadDevice()
+
+local function localCompanion(path, bodyTable)
+    local status, raw, err = requestRaw("POST", COMPANION_URL .. path, bodyTable)
+    if not raw or (status~=0 and status~=200) then return nil,err or "ARASAKA Auth offline" end
+    local ok, decoded=pcall(function() return HttpService:JSONDecode(raw) end)
+    if not ok or type(decoded)~="table" then return nil,"Resposta invalida do ARASAKA Auth" end
+    return decoded,nil
+end
+
+local function registerCompanion()
+    if PLATFORM~="windows" then return true end
+    local d,err=localCompanion("/register",{api=API,uid=UID,deviceId=Device.deviceId,installToken=Device.installToken})
+    if not d or d.success~=true then return false,(d and d.message) or err or "Abra ARASAKA Auth.exe" end
+    return true
+end
+
+local function getCompanionProof(useSessionToken)
+    local body={uid=UID,version=VERSION,deviceId=Device.deviceId}
+    if useSessionToken then body.sessionToken=useSessionToken else body.installToken=Device.installToken end
+    local challenge,err=requestJson("POST","/api/device/challenge",body)
+    if not challenge then return nil,err end
+    if challenge.required~=true then return {required=false} end
+    local signed,signErr=localCompanion("/sign",{challengeId=challenge.challengeId,nonce=challenge.nonce,uid=UID,deviceId=Device.deviceId})
+    if not signed or signed.success~=true or type(signed.signature)~="string" then return nil,(signed and signed.message) or signErr or "ARASAKA Auth nao respondeu" end
+    return {required=true,challengeId=challenge.challengeId,signature=signed.signature}
+end
+
+local function bootstrap()
+    if not Device.installToken then
+        return requestJson("POST","/api/bootstrap",{uid=UID,version=VERSION,fingerprint=CLIENT_INSTANCE_ID,deviceId=Device.deviceId})
+    end
+    local proof,proofErr=getCompanionProof(nil)
+    if not proof then return nil,proofErr end
+    return requestJson("POST","/api/bootstrap",{
+        uid=UID,version=VERSION,fingerprint=CLIENT_INSTANCE_ID,deviceId=Device.deviceId,installToken=Device.installToken,
+        challengeId=proof.challengeId,signature=proof.signature
+    })
+end
+
+local function redeemKey(keyText)
+    return requestJson("POST","/api/redeem-key",{key=keyText,uid=UID,version=VERSION,platform=PLATFORM,deviceId=Device.deviceId})
+end
+
+local function enrollPair(code)
+    return requestJson("POST","/api/device/enroll-pair",{pairCode=code,uid=UID,version=VERSION,platform=PLATFORM,deviceId=Device.deviceId})
+end
+
+local function acceptEnrollment(response)
+    if type(response)~="table" or type(response.installToken)~="string" or response.installToken=="" then return false,"Servidor nao entregou token da instalacao." end
+    Device.uid=UID;Device.platform=PLATFORM;Device.deviceId=response.deviceId or Device.deviceId;Device.installToken=response.installToken
+    local ok,err=saveDevice(Device)
+    if not ok then return false,err end
+    if response.companionRequired==true then
+        local cok,cerr=registerCompanion()
+        if not cok then return false,cerr end
+    end
+    return true
+end
+
+local function requestScriptTicket(sessionToken)
+    return requestJson("POST","/api/script-ticket",{uid=UID,version=VERSION,sessionToken=sessionToken})
+end
+
+local function downloadScript(ticket,sessionToken)
+    local status,source,err=requestRaw("POST",API.."/api/script",{ticket=ticket,uid=UID,version=VERSION,sessionToken=sessionToken})
+    if not source then return nil,err or "Falha ao baixar Hub" end
+    if status~=0 and status~=200 then return nil,"Servidor recusou o download (HTTP "..tostring(status)..")" end
+    if #source<100 then return nil,"Payload invalido: "..tostring(source) end
+    return source,nil
+end
+
+local function createContext(response)
+    local token=response and response.sessionToken
+    if type(token)~="string" or token=="" then return nil,"Servidor nao entregou sessionToken" end
+    local context={
+        api=API,uid=UID,version=VERSION,sessionToken=token,sessionExpiresAt=tonumber(response.sessionExpiresAt),
+        licenseExpiresAt=tonumber(response.expiresAt),isLifetime=response.isLifetime==true,
+        heartbeatSeconds=tonumber(response.heartbeatSeconds) or 60,offlineGraceSeconds=tonumber(response.offlineGraceSeconds) or 600,
+        controlEpoch=tonumber(response.controlEpoch),clientInstanceId=CLIENT_INSTANCE_ID,lastServerOkAt=os.time(),
+        deviceId=Device.deviceId,platform=PLATFORM,companionRequired=response.companionRequired==true,companionUrl=COMPANION_URL
+    }
+    ENV.ARASAKA_BOOTSTRAP_CONTEXT=context
+    return context
+end
+
+local function runPayload(authResponse,setStatus)
+    local context,contextErr=createContext(authResponse);if not context then return false,contextErr end
+    if setStatus then setStatus("Solicitando ticket seguro...",Color3.fromRGB(255,210,80)) end
+    local tr,te=requestScriptTicket(context.sessionToken)
+    if not tr or tr.success~=true or type(tr.ticket)~="string" then return false,(tr and tr.message) or te or "Falha ao emitir ticket" end
+    if setStatus then setStatus("Baixando build autorizada...",Color3.fromRGB(255,210,80)) end
+    local source,se=downloadScript(tr.ticket,context.sessionToken);if not source then return false,se end
+    if type(loadstring)~="function" then return false,"Este ambiente nao possui loadstring." end
+    local chunk,ce=loadstring(source,"ARASAKA_PAYLOAD");source=nil
+    if not chunk then return false,"Falha ao compilar payload: "..tostring(ce) end
+    if setStatus then setStatus("ARASAKA autorizado. Iniciando...",Color3.fromRGB(80,255,120)) end
+    task.wait(0.25)
+    local ok,re=pcall(chunk);chunk=nil
+    if not ok then ENV.ARASAKA_BOOTSTRAP_CONTEXT=nil;return false,"Erro ao iniciar Hub: "..tostring(re) end
+    return true
+end
+
+-- UI
+local old=PlayerGui:FindFirstChild("ArasakaSecureLoader");if old then old:Destroy() end
+local Gui=Instance.new("ScreenGui");Gui.Name="ArasakaSecureLoader";Gui.ResetOnSpawn=false;Gui.IgnoreGuiInset=true;Gui.DisplayOrder=1000000;Gui.Parent=PlayerGui
+local Overlay=Instance.new("Frame");Overlay.Size=UDim2.fromScale(1,1);Overlay.BackgroundColor3=Color3.fromRGB(2,2,3);Overlay.BackgroundTransparency=0.06;Overlay.BorderSizePixel=0;Overlay.Parent=Gui
+local Card=Instance.new("Frame");Card.AnchorPoint=Vector2.new(.5,.5);Card.Position=UDim2.fromScale(.5,.5);Card.Size=UDim2.new(0,420,0,280);Card.BackgroundColor3=Color3.fromRGB(10,10,13);Card.BorderSizePixel=0;Card.Parent=Overlay;Instance.new("UICorner",Card).CornerRadius=UDim.new(0,7)
+local Stroke=Instance.new("UIStroke",Card);Stroke.Color=Color3.fromRGB(190,25,25);Stroke.Thickness=1.5
+local Accent=Instance.new("Frame");Accent.Size=UDim2.new(0,4,1,0);Accent.BackgroundColor3=Color3.fromRGB(210,35,35);Accent.BorderSizePixel=0;Accent.Parent=Card
+local Title=Instance.new("TextLabel");Title.BackgroundTransparency=1;Title.Position=UDim2.new(0,20,0,18);Title.Size=UDim2.new(1,-40,0,28);Title.Font=Enum.Font.GothamBold;Title.Text="ARASAKA // SECURE ACCESS";Title.TextSize=16;Title.TextColor3=Color3.fromRGB(245,245,245);Title.TextXAlignment=Enum.TextXAlignment.Left;Title.Parent=Card
+local Sub=Instance.new("TextLabel");Sub.BackgroundTransparency=1;Sub.Position=UDim2.new(0,20,0,47);Sub.Size=UDim2.new(1,-40,0,20);Sub.Font=Enum.Font.Code;Sub.Text="UID "..UID.." // "..string.upper(PLATFORM);Sub.TextSize=10;Sub.TextColor3=Color3.fromRGB(115,115,120);Sub.TextXAlignment=Enum.TextXAlignment.Left;Sub.Parent=Card
+local Status=Instance.new("TextLabel");Status.BackgroundTransparency=1;Status.Position=UDim2.new(0,20,0,76);Status.Size=UDim2.new(1,-40,0,48);Status.Font=Enum.Font.Gotham;Status.Text="Validando licenca e dispositivo...";Status.TextSize=13;Status.TextWrapped=true;Status.TextColor3=Color3.fromRGB(190,190,195);Status.TextXAlignment=Enum.TextXAlignment.Left;Status.Parent=Card
+local Input=Instance.new("TextBox");Input.Position=UDim2.new(0,20,0,134);Input.Size=UDim2.new(1,-40,0,42);Input.BackgroundColor3=Color3.fromRGB(20,20,25);Input.BorderSizePixel=0;Input.ClearTextOnFocus=false;Input.PlaceholderText="Key ou codigo PAIR-XXXXXXXX";Input.Text="";Input.TextColor3=Color3.fromRGB(245,245,245);Input.PlaceholderColor3=Color3.fromRGB(95,95,100);Input.Font=Enum.Font.Gotham;Input.TextSize=13;Input.Parent=Card;Instance.new("UICorner",Input).CornerRadius=UDim.new(0,5)
+local Button=Instance.new("TextButton");Button.Position=UDim2.new(0,20,0,188);Button.Size=UDim2.new(1,-40,0,40);Button.BackgroundColor3=Color3.fromRGB(150,20,25);Button.BorderSizePixel=0;Button.Text="VALIDAR / ATIVAR";Button.TextColor3=Color3.fromRGB(255,255,255);Button.Font=Enum.Font.GothamBold;Button.TextSize=12;Button.Parent=Card;Instance.new("UICorner",Button).CornerRadius=UDim.new(0,5)
+local Hint=Instance.new("TextLabel");Hint.BackgroundTransparency=1;Hint.Position=UDim2.new(0,20,0,238);Hint.Size=UDim2.new(1,-40,0,24);Hint.Font=Enum.Font.Code;Hint.Text="PC: mantenha ARASAKA Auth.exe aberto // Mobile: instalacao persistente";Hint.TextSize=9;Hint.TextColor3=Color3.fromRGB(95,95,100);Hint.TextXAlignment=Enum.TextXAlignment.Left;Hint.Parent=Card
+local function setStatus(t,c) Status.Text=tostring(t or "");if c then Status.TextColor3=c end end
+local busy=false
+local function setBusy(v) busy=v==true;Button.Active=not busy;Button.AutoButtonColor=not busy;Button.Text=busy and "PROCESSANDO..." or "VALIDAR / ATIVAR" end
+local function finishSuccess() TweenService:Create(Card,TweenInfo.new(.18),{BackgroundTransparency=1}):Play();task.wait(.2);if Gui then Gui:Destroy() end end
+
+local function authAndRun(inputText)
+    if busy then return end;setBusy(true)
+    if not HAS_STORAGE then setStatus("Seu executor nao possui armazenamento persistente (readfile/writefile).",Color3.fromRGB(255,95,95));setBusy(false);return end
+    local response,err
+    if Device.installToken then
+        if PLATFORM=="windows" then pcall(registerCompanion) end
+        setStatus("Validando dispositivo cadastrado...",Color3.fromRGB(255,210,80));response,err=bootstrap()
+    elseif inputText and inputText~="" then
+        setStatus("Cadastrando dispositivo...",Color3.fromRGB(255,210,80))
+        if string.sub(string.upper(inputText),1,5)=="PAIR-" then response,err=enrollPair(inputText) else response,err=redeemKey(inputText) end
+        if response and response.status=="device_enrolled" then
+            local ok,saveErr=acceptEnrollment(response)
+            if not ok then setStatus(saveErr,Color3.fromRGB(255,95,95));setBusy(false);return end
+            setStatus("Dispositivo cadastrado. Criando sessao...",Color3.fromRGB(255,210,80));response,err=bootstrap()
+        end
+    else
+        setStatus("Este dispositivo ainda nao esta cadastrado. Digite sua key ou um codigo PAIR.",Color3.fromRGB(255,170,70));setBusy(false);return
+    end
+    if not response then setStatus(err or "Servidor temporariamente indisponivel.",Color3.fromRGB(255,95,95));setBusy(false);return end
+    if response.authorized~=true then
+        local st=tostring(response.status or "")
+        if st=="companion_not_registered" or st=="companion_required" then setStatus("Abra ARASAKA Auth.exe e tente novamente.",Color3.fromRGB(255,170,70))
+        elseif st=="device_required" then setStatus("Dispositivo nao cadastrado. Digite sua key ou codigo PAIR.",Color3.fromRGB(255,170,70))
+        else setStatus(response.message or "Acesso recusado.",Color3.fromRGB(255,95,95)) end
+        setBusy(false);return
+    end
+    local okRun,runErr=runPayload(response,setStatus);if not okRun then setStatus(runErr or "Falha ao iniciar Hub.",Color3.fromRGB(255,95,95));setBusy(false);return end
+    finishSuccess()
+end
+
+Button.MouseButton1Click:Connect(function() authAndRun(Input.Text) end)
+task.spawn(function() task.wait(.2);if Device.installToken then authAndRun(nil) else setStatus("Primeiro acesso: digite sua key. Segundo aparelho: use um codigo PAIR.",Color3.fromRGB(255,210,80)) end end)
