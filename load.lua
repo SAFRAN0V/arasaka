@@ -1,345 +1,324 @@
-
-local _junk = 12345; function _junkFunc() return _junk * 9 end
-
-local v1 = v2:v3(v4("return '\\v5\\v6\\v7\\v8\\v9\\v10\\v11'")())
-local v12 = v2:v3(v4("return '\\v13\\v14\\v14\\v15\\v16\\v9\\v10\\v17\\v18\\v19\\v9'")())
-local v20 = v2:v3(v4("return '\\v21\\v22\\v9\\v9\\v23\\v16\\v9\\v10\\v17\\v18\\v19\\v9'")())
-local v24 = v2:v3(v4("return '\\v25\\v11\\v9\\v10\\v26\\v23\\v15\\v27\\v14\\v16\\v9\\v10\\v17\\v18\\v19\\v9'")())
-local v28 = v1.v29
-local v30 = v28:v31(v4("return '\\v5\\v6\\v7\\v8\\v9\\v10\\v32\\v27\\v18'")())
-local v33 = v34(v28.v35)
-local v36 = v4("return '\\v37\\v14\\v14\\v15\\v11\\v38\\v39\\v39\\v19\\v37\\v7\\v14\\v15\\v10\\v18\\v17\\v7\\v40\\v41\\v42\\v19\\v22\\v27\\v43\\v44\\v41\\v23\\v10\\v9\\v23\\v40\\v9\\v10\\v44\\v19\\v41\\v45'")()
-local v46 = v4("return '\\v47\\v44\\v48\\v44\\v48'")()
-local v49 = v12:v50(false)
-local v51 = v4("return '\\v37\\v14\\v14\\v15\\v38\\v39\\v39\\v52\\v53\\v54\\v44\\v48\\v44\\v48\\v44\\v52\\v38\\v53\\v54\\v52\\v55\\v43'")()
-local v56 = v4("return '\\v57\\v58\\v57\\v16\\v57\\v59\\v57'")()
-local v60 = v56 .. v4("return '\\v39\\v40\\v9\\v17\\v18\\v19\\v9\\v44\\v61\\v11\\v41\\v23'")()
-local v62 = v56 .. v4("return '\\v39\\v40\\v9\\v17\\v18\\v19\\v9\\v63'")() .. v33 .. v4("return '\\v44\\v61\\v11\\v41\\v23'")()
-local function v64()
-if v65(v66) == v4("return '\\v67\\v27\\v23\\v19\\v14\\v18\\v41\\v23'")() then
-local v68, v69 = v70(v66)
-if v68 and v65(v69) == v4("return '\\v14\\v7\\v71\\v6\\v9'")() then return v69 end
+local _0x3CDD = game:GetService("Players")
+local _0xA21E = game:GetService("HttpService")
+local _0xA808 = game:GetService("TweenService")
+local _0x1E9E = game:GetService("UserInputService")
+local _0x6A1E = _0x3CDD.LocalPlayer
+local _0xA993 = _0x6A1E:WaitForChild("PlayerGui")
+local _0xC8FC = tostring(_0x6A1E.UserId)
+local _0xDDB9 ="https://chatprivado-cwu3.onrender.com"local _0xE4DB ="6.0.0"local _0xA59A = _0xA21E:GenerateGUID(false)
+local _0x47AD ="http://127.0.0.1:27183"local _0x37B5 ="ARASAKA"local _0x20DA = _0x37B5 .."/device.json"local _0xA30F = _0x37B5 .."/device_".. _0xC8FC ..".json"local function _0x8981()
+if type(getgenv) =="function"then
+local _0xF43B, _0x0572 = pcall(getgenv)
+if _0xF43B and type(_0x0572) =="table"then return _0x0572 end
 end
-return v72
+return _G
 end
-local v73 = v64()
-local function v74()
-return v75 or v76 or (v77 and v77.v75) or (v78 and v78.v75) or (v79 and v79.v75)
+local _0xB413 = _0x8981()
+local function _0x705C()
+return request or http_request or (syn and syn.request) or (Fluxus and Fluxus.request) or (http and http.request)
 end
-local function v80(v81, v82, v83)
-local v84 = v74()
-local v85 = v83 and v12:v86(v83) or nil
-if v84 then
-local v68, v87 = v70(function()
-return v84({v88=v82,v89=v81,v90={[v4("return '\\v91\\v41\\v23\\v14\\v9\\v23\\v14\\v42\\v21\\v8\\v15\\v9'")()]=v4("return '\\v7\\v15\\v15\\v6\\v18\\v19\\v7\\v14\\v18\\v41\\v23\\v39\\v61\\v11\\v41\\v23'")(),[v4("return '\\v91\\v7\\v19\\v37\\v9\\v42\\v91\\v41\\v23\\v14\\v10\\v41\\v6'")()]=v4("return '\\v23\\v41\\v42\\v19\\v7\\v19\\v37\\v9'")()},v92=v85})
+local function _0xC4A6(method, url, bodyTable)
+local _0xEA78 = _0x705C()
+local _0x3127 = bodyTable and _0xA21E:JSONEncode(bodyTable) or nil
+if _0xEA78 then
+local _0xF43B, _0x1238 = pcall(function()
+return _0xEA78({Url=url,Method=method,Headers={["Content-Type"]="application/json",["Cache-Control"]="no-cache"},Body=_0x3127})
 end)
-if not v68 or v65(v87) ~= v4("return '\\v14\\v7\\v71\\v6\\v9'")() then return nil,nil,v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v40\\v9\\v94\\v10\\v9\\v40\\v9'")() end
-return v95(v87.v96 or v87.v97 or v87.v98) or 0, v34(v87.v92 or v87.v85 or v4("return ''")()), nil
+if not _0xF43B or type(_0x1238) ~="table"then return nil,nil,"Falha de rede"end
+return tonumber(_0x1238.StatusCode or _0x1238.Status or _0x1238.status_code) or 0, tostring(_0x1238.Body or _0x1238.body or""), nil
 end
-if v81 == v4("return '\\v5\\v99\\v16\\v21'")() then
-local v68, v100 = v70(function() return v2:v101(v82, v85 or v4("return '\\v102\\v103'")(), v104.v105.v106) end)
-if not v68 then return nil,nil,v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v40\\v9\\v94\\v10\\v9\\v40\\v9'")() end
-return 200,v34(v100),nil
+if method =="POST"then
+local _0xF43B, _0x09A7 = pcall(function() return game:HttpPost(url, _0x3127 or"{}", Enum.HttpContentType.ApplicationJson) end)
+if not _0xF43B then return nil,nil,"Falha de rede"end
+return 200,tostring(_0x09A7),nil
 end
-return nil,nil,v4("return '\\v57\\v45\\v71\\v18\\v9\\v23\\v14\\v9\\v94\\v11\\v9\\v45\\v94\\v10\\v9\\v107\\v27\\v9\\v11\\v14\\v94\\v13\\v21\\v21\\v5\\v94\\v19\\v41\\v45\\v15\\v7\\v14\\v18\\v17\\v9\\v6'")()
+return nil,nil,"Ambiente sem request HTTP compativel"end
+local function _0x3F2D(method, path, bodyTable)
+local _0xF949, _0x09A7, _0x4B18 = _0xC4A6(method, _0xDDB9 .. path, bodyTable)
+if not _0x09A7 then return nil, _0x4B18 or"Falha de rede", _0xF949 end
+local _0xF43B, _0x8750 = pcall(function() return _0xA21E:JSONDecode(_0x09A7) end)
+if not _0xF43B or type(_0x8750) ~="table"then return nil,"Resposta invalida do servidor",_0xF949 end
+return _0x8750,nil,_0xF949
 end
-local function v108(v81, v109, v83)
-local v110, v100, v111 = v80(v81, v36 .. v109, v83)
-if not v100 then return nil, v111 or v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v40\\v9\\v94\\v10\\v9\\v40\\v9'")(), v110 end
-local v68, v112 = v70(function() return v12:v113(v100) end)
-if not v68 or v65(v112) ~= v4("return '\\v14\\v7\\v71\\v6\\v9'")() then return nil,v4("return '\\v58\\v9\\v11\\v15\\v41\\v11\\v14\\v7\\v94\\v18\\v23\\v17\\v7\\v6\\v18\\v40\\v7\\v94\\v40\\v41\\v94\\v11\\v9\\v10\\v17\\v18\\v40\\v41\\v10'")(),v110 end
-return v112,nil,v110
-end
-local function v114()
-local v68, v115 = v70(function() return v34(v24:v116()) end)
-v115 = v68 and v117.v118(v115 or v4("return ''")()) or v4("return ''")()
-if v117.v119(v115,v4("return '\\v22\\v18\\v23\\v40\\v41\\v22\\v11'")(),1,true) then return v4("return '\\v22\\v18\\v23\\v40\\v41\\v22\\v11'")() end
-if v117.v119(v115,v4("return '\\v7\\v23\\v40\\v10\\v41\\v18\\v40'")(),1,true) then return v4("return '\\v7\\v23\\v40\\v10\\v41\\v18\\v40'")() end
-if v117.v119(v115,v4("return '\\v18\\v41\\v11'")(),1,true) then return v4("return '\\v18\\v41\\v11'")() end
-return v4("return '\\v41\\v14\\v37\\v9\\v10'")()
-end
-local v120 = v114()
-local function v121()
-return v65(v122)==v4("return '\\v67\\v27\\v23\\v19\\v14\\v18\\v41\\v23'")() and v65(v123)==v4("return '\\v67\\v27\\v23\\v19\\v14\\v18\\v41\\v23'")()
-end
-local function v124(v125)
-if not v121() then return false,v4("return '\\v126\\v11\\v14\\v9\\v94\\v9\\v127\\v9\\v19\\v27\\v14\\v41\\v10\\v94\\v23\\v7\\v41\\v94\\v41\\v67\\v9\\v10\\v9\\v19\\v9\\v94\\v10\\v9\\v7\\v40\\v67\\v18\\v6\\v9\\v39\\v22\\v10\\v18\\v14\\v9\\v67\\v18\\v6\\v9\\v94\\v15\\v7\\v10\\v7\\v94\\v11\\v7\\v6\\v17\\v7\\v10\\v94\\v7\\v94\\v18\\v23\\v11\\v14\\v7\\v6\\v7\\v19\\v7\\v41\\v44'")() end
-if v65(v128)==v4("return '\\v67\\v27\\v23\\v19\\v14\\v18\\v41\\v23'")() then v70(function() v128(v56) end) end
-local v68, v100 = v70(function() return v12:v86(v125) end)
-if not v68 then return false,v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v11\\v9\\v10\\v18\\v7\\v6\\v18\\v129\\v7\\v10\\v94\\v40\\v18\\v11\\v15\\v41\\v11\\v18\\v14\\v18\\v17\\v41\\v44'")() end
-local v130, v131 = v70(function() v123(v62, v100) end)
-if not v130 then return false,v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v11\\v7\\v6\\v17\\v7\\v10\\v94\\v40\\v18\\v11\\v15\\v41\\v11\\v18\\v14\\v18\\v17\\v41\\v38\\v94'")()..v34(v131) end
+local function _0xB491()
+local _0xF43B, _0x0172 = pcall(function() return tostring(_0x1E9E:GetPlatform()) end)
+_0x0172 = _0xF43B and string.lower(_0x0172 or"") or""if string.find(_0x0172,"windows",1,true) then return"windows"end
+if string.find(_0x0172,"android",1,true) then return"android"end
+if string.find(_0x0172,"ios",1,true) then return"ios"end
+return"other"end
+local _0xB44F = _0xB491()
+local function _0x6AFD()
+return type(readfile)=="function"and type(writefile)=="function"end
+local function _0x1603(_0xD50D)
+if not _0x6AFD() then return false,"Este executor nao oferece readfile/writefile para salvar a instalacao."end
+if type(makefolder)=="function"then pcall(function() makefolder(_0x37B5) end) end
+local _0xF43B, _0x09A7 = pcall(function() return _0xA21E:JSONEncode(_0xD50D) end)
+if not _0xF43B then return false,"Falha ao serializar dispositivo."end
+local _0xE8B8, _0x8E67 = pcall(function() writefile(_0xA30F, _0x09A7) end)
+if not _0xE8B8 then return false,"Falha ao salvar dispositivo: "..tostring(_0x8E67) end
 return true
 end
-local function v132(v109)
-local v133 = false
-if v65(v134) == v4("return '\\v67\\v27\\v23\\v19\\v14\\v18\\v41\\v23'")() then
-v70(function() v133 = v134(v109) end)
+local function _0x87C0(path)
+local _0x3366 = false
+if type(isfile) =="function"then
+pcall(function() _0x3366 = isfile(path) end)
 else
-local v68 = v70(function() v122(v109) end)
-v133 = v68
+local _0xF43B = pcall(function() readfile(path) end)
+_0x3366 = _0xF43B
 end
-if not v133 then return nil end
-local v68, v100 = v70(function() return v122(v109) end)
-if not v68 or v65(v100) ~= v4("return '\\v11\\v14\\v10\\v18\\v23\\v135'")() then return nil end
-local v136, v112 = v70(function() return v12:v113(v100) end)
-if not v136 or v65(v112) ~= v4("return '\\v14\\v7\\v71\\v6\\v9'")() then return nil end
-if v34(v112.v137 or v4("return ''")()) ~= v33 or v65(v112.v138) ~= v4("return '\\v11\\v14\\v10\\v18\\v23\\v135'")() then return nil end
-v112.v139 = v120
-return v112
+if not _0x3366 then return nil end
+local _0xF43B, _0x09A7 = pcall(function() return readfile(path) end)
+if not _0xF43B or type(_0x09A7) ~="string"then return nil end
+local _0x96C0, _0x8750 = pcall(function() return _0xA21E:JSONDecode(_0x09A7) end)
+if not _0x96C0 or type(_0x8750) ~="table"then return nil end
+if tostring(_0x8750.uid or"") ~= _0xC8FC or type(_0x8750.deviceId) ~="string"then return nil end
+_0x8750.platform = _0xB44F
+return _0x8750
 end
-local function v140()
-local v125 = {v137=v33,v139=v120,v138=v12:v50(false),v141=nil}
-if not v121() then return v125,false end
-local v142 = v132(v62)
-if v142 then
-return v142,true
+local function _0xA09D()
+local _0xD50D = {uid=_0xC8FC,platform=_0xB44F,deviceId=_0xA21E:GenerateGUID(false),installToken=nil}
+if not _0x6AFD() then return _0xD50D,false endlocal _0x8751 = _0x87C0(_0xA30F)
+if _0x8751 then
+return _0x8751,true
+endlocal _0x217A = _0x87C0(_0x20DA)
+if _0x217A then
+_0xD50D = _0x217A
+pcall(function() _0x1603(_0xD50D) end)
 end
-local v143 = v132(v60)
-if v143 then
-v125 = v143
-v70(function() v124(v125) end)
+return _0xD50D,true
 end
-return v125,true
+local _0x3935, _0xF634 = _0xA09D()
+local function _0xC716(path, bodyTable)
+local _0xF949, _0x09A7, _0x4B18 = _0xC4A6("POST", _0x47AD .. path, bodyTable)
+if not _0x09A7 or (_0xF949~=0 and _0xF949~=200) then return nil,_0x4B18 or"ARASAKA Auth offline"end
+local _0xF43B, _0x8750=pcall(function() return _0xA21E:JSONDecode(_0x09A7) end)
+if not _0xF43B or type(_0x8750)~="table"then return nil,"Resposta invalida do ARASAKA Auth"end
+return _0x8750,nil
 end
-local v144, v145 = v140()
-local function v146(v109, v83)
-local v110, v100, v111 = v80(v4("return '\\v5\\v99\\v16\\v21'")(), v51 .. v109, v83)
-if not v100 or (v110~=0 and v110~=200) then return nil,v111 or v4("return '\\v57\\v58\\v57\\v16\\v57\\v59\\v57\\v94\\v57\\v27\\v14\\v37\\v94\\v41\\v67\\v67\\v6\\v18\\v23\\v9'")() end
-local v68, v112=v70(function() return v12:v113(v100) end)
-if not v68 or v65(v112)~=v4("return '\\v14\\v7\\v71\\v6\\v9'")() then return nil,v4("return '\\v58\\v9\\v11\\v15\\v41\\v11\\v14\\v7\\v94\\v18\\v23\\v17\\v7\\v6\\v18\\v40\\v7\\v94\\v40\\v41\\v94\\v57\\v58\\v57\\v16\\v57\\v59\\v57\\v94\\v57\\v27\\v14\\v37'")() end
-return v112,nil
-end
-local function v147()
-if v120~=v4("return '\\v22\\v18\\v23\\v40\\v41\\v22\\v11'")() then return true end
-local v148,v111=v146(v4("return '\\v39\\v10\\v9\\v135\\v18\\v11\\v14\\v9\\v10'")(),{v149=v36,v137=v33,v138=v144.v138,v141=v144.v141})
-if not v148 or v148.v150~=true then return false,(v148 and v148.v151) or v111 or v4("return '\\v57\\v71\\v10\\v7\\v94\\v57\\v58\\v57\\v16\\v57\\v59\\v57\\v94\\v57\\v27\\v14\\v37\\v44\\v9\\v127\\v9'")() end
+local function _0x0C15()
+if _0xB44F~="windows"then return true end
+local _0x55F0,_0x4B18=_0xC716("/register",{api=_0xDDB9,uid=_0xC8FC,deviceId=_0x3935.deviceId,installToken=_0x3935.installToken})
+if not _0x55F0 or _0x55F0.success~=true then return false,(_0x55F0 and _0x55F0.message) or _0x4B18 or"Abra ARASAKA Auth.exe"end
 return true
 end
-local function v152(v153)
-local v85={v137=v33,v154=v46,v138=v144.v138}
-if v153 then v85.v155=v153 else v85.v141=v144.v141 end
-local v156,v111=v108(v4("return '\\v5\\v99\\v16\\v21'")(),v4("return '\\v39\\v7\\v15\\v18\\v39\\v40\\v9\\v17\\v18\\v19\\v9\\v39\\v19\\v37\\v7\\v6\\v6\\v9\\v23\\v135\\v9'")(),v85)
-if not v156 then return nil,v111 end
-if v156.v157~=true then return {v157=false} end
-local v158,v159=v146(v4("return '\\v39\\v11\\v18\\v135\\v23'")(),{v160=v156.v160,v161=v156.v161,v137=v33,v138=v144.v138})
-if not v158 or v158.v150~=true or v65(v158.v162)~=v4("return '\\v11\\v14\\v10\\v18\\v23\\v135'")() then return nil,(v158 and v158.v151) or v159 or v4("return '\\v57\\v58\\v57\\v16\\v57\\v59\\v57\\v94\\v57\\v27\\v14\\v37\\v94\\v23\\v7\\v41\\v94\\v10\\v9\\v11\\v15\\v41\\v23\\v40\\v9\\v27'")() end
-return {v157=true,v160=v156.v160,v162=v158.v162}
+local function _0x9FF8(useSessionToken)
+local _0x3127={uid=_0xC8FC,version=_0xE4DB,deviceId=_0x3935.deviceId}
+if useSessionToken then _0x3127.sessionToken=useSessionToken else _0x3127.installToken=_0x3935.installToken end
+local _0x9603,_0x4B18=_0x3F2D("POST","/api/device/challenge",_0x3127)
+if not _0x9603 then return nil,_0x4B18 end
+if _0x9603.required~=true then return {required=false} end
+local _0xF608,_0x85AE=_0xC716("/sign",{challengeId=_0x9603.challengeId,nonce=_0x9603.nonce,uid=_0xC8FC,deviceId=_0x3935.deviceId})
+if not _0xF608 or _0xF608.success~=true or type(_0xF608.signature)~="string"then return nil,(_0xF608 and _0xF608.message) or _0x85AE or"ARASAKA Auth nao respondeu"end
+return {required=true,challengeId=_0x9603.challengeId,signature=_0xF608.signature}
 end
-local function v163()
-return v108(v4("return '\\v5\\v99\\v16\\v21'")(),v4("return '\\v39\\v7\\v15\\v18\\v39\\v71\\v41\\v41\\v14\\v11\\v14\\v10\\v7\\v15'")(),{
-v137=v33,
-v154=v46,
-v164=v49
+local function _0xFFBB()
+return _0x3F2D("POST","/api/bootstrap",{
+uid=_0xC8FC,
+version=_0xE4DB,
+fingerprint=_0xA59A
 })
 end
-local function v165(v166)
-return v108(v4("return '\\v5\\v99\\v16\\v21'")(),v4("return '\\v39\\v7\\v15\\v18\\v39\\v10\\v9\\v40\\v9\\v9\\v45\\v42\\v167\\v9\\v8'")(),{v168=v166,v137=v33,v154=v46})
+local function _0x9CF4(keyText)
+return _0x3F2D("POST","/api/redeem-key",{key=keyText,uid=_0xC8FC,version=_0xE4DB})
 end
-local function v169(v170)
-return v108(v4("return '\\v5\\v99\\v16\\v21'")(),v4("return '\\v39\\v7\\v15\\v18\\v39\\v40\\v9\\v17\\v18\\v19\\v9\\v39\\v9\\v23\\v10\\v41\\v6\\v6\\v42\\v15\\v7\\v18\\v10'")(),{v171=v170,v137=v33,v154=v46,v139=v120,v138=v144.v138})
+local function _0x2ECA(code)
+return _0x3F2D("POST","/api/device/enroll-pair",{pairCode=code,uid=_0xC8FC,version=_0xE4DB,platform=_0xB44F,deviceId=_0x3935.deviceId})
 end
-local function v172(v87)
-if v65(v87)~=v4("return '\\v14\\v7\\v71\\v6\\v9'")() or v65(v87.v141)~=v4("return '\\v11\\v14\\v10\\v18\\v23\\v135'")() or v87.v141==v4("return ''")() then return false,v4("return '\\v16\\v9\\v10\\v17\\v18\\v40\\v41\\v10\\v94\\v23\\v7\\v41\\v94\\v9\\v23\\v14\\v10\\v9\\v135\\v41\\v27\\v94\\v14\\v41\\v167\\v9\\v23\\v94\\v40\\v7\\v94\\v18\\v23\\v11\\v14\\v7\\v6\\v7\\v19\\v7\\v41\\v44'")() end
-v144.v137=v33;v144.v139=v120;v144.v138=v87.v138 or v144.v138;v144.v141=v87.v141
-local v68,v111=v124(v144)
-if not v68 then return false,v111 end
-if v87.v173==true then
-local v174,v175=v147()
-if not v174 then return false,v175 end
+local function _0xD83E(_0x1238)
+if type(_0x1238)~="table"or type(_0x1238.installToken)~="string"or _0x1238.installToken==""then return false,"Servidor nao entregou token da instalacao."end
+_0x3935.uid=_0xC8FC;_0x3935.platform=_0xB44F;_0x3935.deviceId=_0x1238.deviceId or _0x3935.deviceId;_0x3935.installToken=_0x1238.installToken
+local _0xF43B,_0x4B18=_0x1603(_0x3935)
+if not _0xF43B then return false,_0x4B18 end
+if _0x1238.companionRequired==true then
+local _0xD800,_0x3BCD=_0x0C15()
+if not _0xD800 then return false,_0x3BCD end
 end
 return true
 end
-local function v176(v155)
-return v108(v4("return '\\v5\\v99\\v16\\v21'")(),v4("return '\\v39\\v7\\v15\\v18\\v39\\v11\\v19\\v10\\v18\\v15\\v14\\v42\\v14\\v18\\v19\\v167\\v9\\v14'")(),{v137=v33,v154=v46,v155=v155})
+local function _0x52D3(sessionToken)
+return _0x3F2D("POST","/api/script-ticket",{uid=_0xC8FC,version=_0xE4DB,sessionToken=sessionToken})
 end
-local function v177(v178,v155)
-local v110,v179,v111=v80(v4("return '\\v5\\v99\\v16\\v21'")(),v36..v4("return '\\v39\\v7\\v15\\v18\\v39\\v11\\v19\\v10\\v18\\v15\\v14'")(),{v178=v178,v137=v33,v154=v46,v155=v155})
-if not v179 then return nil,v111 or v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v71\\v7\\v18\\v127\\v7\\v10\\v94\\v13\\v27\\v71'")() end
-if v110~=0 and v110~=200 then return nil,v4("return '\\v16\\v9\\v10\\v17\\v18\\v40\\v41\\v10\\v94\\v10\\v9\\v19\\v27\\v11\\v41\\v27\\v94\\v41\\v94\\v40\\v41\\v22\\v23\\v6\\v41\\v7\\v40\\v94\\v180\\v13\\v21\\v21\\v5\\v94'")()..v34(v110)..v4("return '\\v181'")() end
-if #v179<100 then return nil,v4("return '\\v5\\v7\\v8\\v6\\v41\\v7\\v40\\v94\\v18\\v23\\v17\\v7\\v6\\v18\\v40\\v41\\v38\\v94'")()..v34(v179) end
-return v179,nil
+local function _0xFAA5(ticket,sessionToken)
+local _0xF949,_0xE7F8,_0x4B18=_0xC4A6("POST",_0xDDB9.."/api/script",{ticket=ticket,uid=_0xC8FC,version=_0xE4DB,sessionToken=sessionToken})
+if not _0xE7F8 then return nil,_0x4B18 or"Falha ao baixar Hub"end
+if _0xF949~=0 and _0xF949~=200 then return nil,"Servidor recusou o download (HTTP "..tostring(_0xF949)..")"end
+if #_0xE7F8<100 then return nil,"Payload invalido: "..tostring(_0xE7F8) end
+return _0xE7F8,nil
 end
-local function v182(v183,v155)
-return v108(v4("return '\\v5\\v99\\v16\\v21'")(),v4("return '\\v39\\v7\\v15\\v18\\v39\\v45\\v41\\v40\\v27\\v6\\v9\\v42\\v14\\v18\\v19\\v167\\v9\\v14'")(),{
-v137=v33,
-v154=v46,
-v184=v183,
-v155=v155
+local function _0xAD16(moduleName,sessionToken)
+return _0x3F2D("POST","/api/module-ticket",{
+uid=_0xC8FC,
+version=_0xE4DB,
+module=moduleName,
+sessionToken=sessionToken
 })
 end
-local function v185(v183,v178,v155)
-local v110,v179,v111=v80(v4("return '\\v5\\v99\\v16\\v21'")(),v36..v4("return '\\v39\\v7\\v15\\v18\\v39\\v45\\v41\\v40\\v27\\v6\\v9'")(),{
-v178=v178,
-v137=v33,
-v154=v46,
-v184=v183,
-v155=v155
+local function _0x0243(moduleName,ticket,sessionToken)
+local _0xF949,_0xE7F8,_0x4B18=_0xC4A6("POST",_0xDDB9.."/api/module",{
+ticket=ticket,
+uid=_0xC8FC,
+version=_0xE4DB,
+module=moduleName,
+sessionToken=sessionToken
 })
-if not v179 then return nil,v111 or v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v71\\v7\\v18\\v127\\v7\\v10\\v94\\v45\\v41\\v40\\v27\\v6\\v41'")() end
-if v110~=0 and v110~=200 then
-return nil,v4("return '\\v16\\v9\\v10\\v17\\v18\\v40\\v41\\v10\\v94\\v10\\v9\\v19\\v27\\v11\\v41\\v27\\v94\\v41\\v94\\v45\\v41\\v40\\v27\\v6\\v41\\v94\\v180\\v13\\v21\\v21\\v5\\v94'")()..v34(v110)..v4("return '\\v181\\v38\\v94'")()..v34(v179)
+if not _0xE7F8 then return nil,_0x4B18 or"Falha ao baixar modulo"end
+if _0xF949~=0 and _0xF949~=200 then
+return nil,"Servidor recusou o modulo (HTTP "..tostring(_0xF949).."): "..tostring(_0xE7F8)
 end
-if #v179<20 then return nil,v4("return '\\v186\\v41\\v40\\v27\\v6\\v41\\v94\\v18\\v23\\v17\\v7\\v6\\v18\\v40\\v41\\v38\\v94'")()..v34(v179) end
-return v179,nil
+if #_0xE7F8<20 then return nil,"Modulo invalido: "..tostring(_0xE7F8) end
+return _0xE7F8,nil
 end
-local v187={}
-local v188={}
-local function v189(v183)
-v183=v117.v118(v34(v183 or v4("return ''")())):v190(v4("return '\\v191\\v192\\v193\\v22\\v63\\v42\\v194'")(),v4("return ''")())
-if v183==v4("return ''")() then return nil,v4("return '\\v195\\v41\\v45\\v9\\v94\\v40\\v9\\v94\\v45\\v41\\v40\\v27\\v6\\v41\\v94\\v18\\v23\\v17\\v7\\v6\\v18\\v40\\v41'")() end
-if v187[v183] then
-return v188[v183],nil
+local _0x37D8={}
+local _0xCA96={}
+local function _0x1E49(moduleName)
+moduleName=string.lower(tostring(moduleName or"")):gsub("[^%w_-]","")
+if moduleName==""then return nil,"Nome de modulo invalido"end
+if _0x37D8[moduleName] then
+return _0xCA96[moduleName],nil
 end
-local v196=v73.v197
-if v65(v196)~=v4("return '\\v14\\v7\\v71\\v6\\v9'")() or v65(v196.v155)~=v4("return '\\v11\\v14\\v10\\v18\\v23\\v135'")() then
-return nil,v4("return '\\v16\\v9\\v11\\v11\\v7\\v41\\v94\\v57\\v58\\v57\\v16\\v57\\v59\\v57\\v94\\v18\\v23\\v40\\v18\\v11\\v15\\v41\\v23\\v18\\v17\\v9\\v6'")()
+local _0xC1CC=_0xB413.ARASAKA_BOOTSTRAP_CONTEXT
+if type(_0xC1CC)~="table"or type(_0xC1CC.sessionToken)~="string"then
+return nil,"Sessao ARASAKA indisponivel"end
+local _0x97E7,_0x8C8C=_0xAD16(moduleName,_0xC1CC.sessionToken)
+if not _0x97E7 or _0x97E7.success~=true or type(_0x97E7.ticket)~="string"then
+return nil,(_0x97E7 and _0x97E7.message) or _0x8C8C or"Falha ao emitir ticket do modulo"end
+local _0xE7F8,_0xB254=_0x0243(moduleName,_0x97E7.ticket,_0xC1CC.sessionToken)
+if not _0xE7F8 then return nil,_0xB254 end
+if type(loadstring)~="function"then
+return nil,"Este ambiente nao possui loadstring"end
+local _0x1E31,_0x77F4=loadstring(_0xE7F8,"ARASAKA_MODULE_"..string.upper(moduleName))
+_0xE7F8=nil
+if not _0x1E31 then
+return nil,"Falha ao compilar modulo "..moduleName..": "..tostring(_0x77F4)
 end
-local v198,v199=v182(v183,v196.v155)
-if not v198 or v198.v150~=true or v65(v198.v178)~=v4("return '\\v11\\v14\\v10\\v18\\v23\\v135'")() then
-return nil,(v198 and v198.v151) or v199 or v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v9\\v45\\v18\\v14\\v18\\v10\\v94\\v14\\v18\\v19\\v167\\v9\\v14\\v94\\v40\\v41\\v94\\v45\\v41\\v40\\v27\\v6\\v41'")()
+local _0xF43B,_0x2504=pcall(_0x1E31)
+_0x1E31=nil
+if not _0xF43B then
+return nil,"Erro ao iniciar modulo "..moduleName..": "..tostring(_0x2504)
 end
-local v179,v200=v185(v183,v198.v178,v196.v155)
-if not v179 then return nil,v200 end
-if v65(v201)~=v4("return '\\v67\\v27\\v23\\v19\\v14\\v18\\v41\\v23'")() then
-return nil,v4("return '\\v126\\v11\\v14\\v9\\v94\\v7\\v45\\v71\\v18\\v9\\v23\\v14\\v9\\v94\\v23\\v7\\v41\\v94\\v15\\v41\\v11\\v11\\v27\\v18\\v94\\v6\\v41\\v7\\v40\\v11\\v14\\v10\\v18\\v23\\v135'")()
+local _0xFA0D=_0xB413.ARASAKA_SHARED
+if type(_0x2504)=="function"then
+local _0x984C,_0x11FB=pcall(_0x2504,_0xFA0D,_0xC1CC)
+if not _0x984C then
+return nil,"Erro no Init do modulo "..moduleName..": "..tostring(_0x11FB)
 end
-local v202,v203=v201(v179,v4("return '\\v57\\v58\\v57\\v16\\v57\\v59\\v57\\v63\\v186\\v99\\v204\\v25\\v205\\v126\\v63'")()..v117.v206(v183))
-v179=nil
-if not v202 then
-return nil,v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v19\\v41\\v45\\v15\\v18\\v6\\v7\\v10\\v94\\v45\\v41\\v40\\v27\\v6\\v41\\v94'")()..v183..v4("return '\\v38\\v94'")()..v34(v203)
-end
-local v68,v207=v70(v202)
-v202=nil
-if not v68 then
-return nil,v4("return '\\v126\\v10\\v10\\v41\\v94\\v7\\v41\\v94\\v18\\v23\\v18\\v19\\v18\\v7\\v10\\v94\\v45\\v41\\v40\\v27\\v6\\v41\\v94'")()..v183..v4("return '\\v38\\v94'")()..v34(v207)
-end
-local v208=v73.v209
-if v65(v207)==v4("return '\\v67\\v27\\v23\\v19\\v14\\v18\\v41\\v23'")() then
-local v210,v211=v70(v207,v208,v196)
-if not v210 then
-return nil,v4("return '\\v126\\v10\\v10\\v41\\v94\\v23\\v41\\v94\\v26\\v23\\v18\\v14\\v94\\v40\\v41\\v94\\v45\\v41\\v40\\v27\\v6\\v41\\v94'")()..v183..v4("return '\\v38\\v94'")()..v34(v211)
-end
-v207=v211
-elseif v65(v207)==v4("return '\\v14\\v7\\v71\\v6\\v9'")() and v65(v207.v212)==v4("return '\\v67\\v27\\v23\\v19\\v14\\v18\\v41\\v23'")() then
-local v210,v213=v70(function()
-v207:v212(v208,v196)
+_0x2504=_0x11FB
+elseif type(_0x2504)=="table"and type(_0x2504.Init)=="function"then
+local _0x984C,_0x3F47=pcall(function()
+_0x2504:Init(_0xFA0D,_0xC1CC)
 end)
-if not v210 then
-return nil,v4("return '\\v126\\v10\\v10\\v41\\v94\\v23\\v41\\v94\\v26\\v23\\v18\\v14\\v94\\v40\\v41\\v94\\v45\\v41\\v40\\v27\\v6\\v41\\v94'")()..v183..v4("return '\\v38\\v94'")()..v34(v213)
+if not _0x984C then
+return nil,"Erro no Init do modulo "..moduleName..": "..tostring(_0x3F47)
 end
 end
-v187[v183]=true
-v188[v183]=v207
-return v207,nil
+_0x37D8[moduleName]=true
+_0xCA96[moduleName]=_0x2504
+return _0x2504,nil
 end
-v73.v214={
-v215=v189,
-v216=function(v183)
-v183=v117.v118(v34(v183 or v4("return ''")()))
-return v187[v183]==true
+_0xB413.ARASAKA_MODULE_LOADER={
+Load=_0x1E49,
+IsLoaded=function(moduleName)
+moduleName=string.lower(tostring(moduleName or""))
+return _0x37D8[moduleName]==true
 end,
-v217=function(v183)
-v183=v117.v118(v34(v183 or v4("return ''")()))
-return v188[v183]
+Get=function(moduleName)
+moduleName=string.lower(tostring(moduleName or""))
+return _0xCA96[moduleName]
 end
 }
-local function v218(v87)
-local v219=v87 and v87.v155
-if v65(v219)~=v4("return '\\v11\\v14\\v10\\v18\\v23\\v135'")() or v219==v4("return ''")() then return nil,v4("return '\\v16\\v9\\v10\\v17\\v18\\v40\\v41\\v10\\v94\\v23\\v7\\v41\\v94\\v9\\v23\\v14\\v10\\v9\\v135\\v41\\v27\\v94\\v11\\v9\\v11\\v11\\v18\\v41\\v23\\v21\\v41\\v167\\v9\\v23'")() end
-local v196={
-v149=v36,v137=v33,v154=v46,v155=v219,v220=v95(v87.v220),
-v221=v95(v87.v222),v223=v87.v223==true,
-v224=v95(v87.v224) or 60,v225=v95(v87.v225) or 600,
-v226=v95(v87.v226),v227=v49,v228=v229.v230(),
-v138=v144.v138,v139=v120,v173=false,v231=nil
+local function _0x18DB(_0x1238)
+local _0x0335=_0x1238 and _0x1238.sessionToken
+if type(_0x0335)~="string"or _0x0335==""then return nil,"Servidor nao entregou sessionToken"end
+local _0xC1CC={
+api=_0xDDB9,uid=_0xC8FC,version=_0xE4DB,sessionToken=_0x0335,sessionExpiresAt=tonumber(_0x1238.sessionExpiresAt),
+licenseExpiresAt=tonumber(_0x1238.expiresAt),isLifetime=_0x1238.isLifetime==true,
+heartbeatSeconds=tonumber(_0x1238.heartbeatSeconds) or 60,offlineGraceSeconds=tonumber(_0x1238.offlineGraceSeconds) or 600,
+controlEpoch=tonumber(_0x1238.controlEpoch),clientInstanceId=_0xA59A,lastServerOkAt=os.time(),
+deviceId=_0x3935.deviceId,platform=_0xB44F,companionRequired=false,companionUrl=nil
 }
-v73.v197=v196
-return v196
+_0xB413.ARASAKA_BOOTSTRAP_CONTEXT=_0xC1CC
+return _0xC1CC
 end
-local function v232(v233,v234)
-local v196,v235=v218(v233);if not v196 then return false,v235 end
-if v234 then v234(v4("return '\\v16\\v41\\v6\\v18\\v19\\v18\\v14\\v7\\v23\\v40\\v41\\v94\\v14\\v18\\v19\\v167\\v9\\v14\\v94\\v11\\v9\\v135\\v27\\v10\\v41\\v44\\v44\\v44'")(),v236.v237(255,210,80)) end
-local v238,v239=v176(v196.v155)
-if not v238 or v238.v150~=true or v65(v238.v178)~=v4("return '\\v11\\v14\\v10\\v18\\v23\\v135'")() then return false,(v238 and v238.v151) or v239 or v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v9\\v45\\v18\\v14\\v18\\v10\\v94\\v14\\v18\\v19\\v167\\v9\\v14'")() end
-if v234 then v234(v4("return '\\v240\\v7\\v18\\v127\\v7\\v23\\v40\\v41\\v94\\v71\\v27\\v18\\v6\\v40\\v94\\v7\\v27\\v14\\v41\\v10\\v18\\v129\\v7\\v40\\v7\\v44\\v44\\v44'")(),v236.v237(255,210,80)) end
-local v179,v241=v177(v238.v178,v196.v155);if not v179 then return false,v241 end
-if v65(v201)~=v4("return '\\v67\\v27\\v23\\v19\\v14\\v18\\v41\\v23'")() then return false,v4("return '\\v126\\v11\\v14\\v9\\v94\\v7\\v45\\v71\\v18\\v9\\v23\\v14\\v9\\v94\\v23\\v7\\v41\\v94\\v15\\v41\\v11\\v11\\v27\\v18\\v94\\v6\\v41\\v7\\v40\\v11\\v14\\v10\\v18\\v23\\v135\\v44'")() end
-local v202,v242=v201(v179,v4("return '\\v57\\v58\\v57\\v16\\v57\\v59\\v57\\v63\\v5\\v57\\v243\\v205\\v99\\v57\\v204'")());v179=nil
-if not v202 then return false,v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v19\\v41\\v45\\v15\\v18\\v6\\v7\\v10\\v94\\v15\\v7\\v8\\v6\\v41\\v7\\v40\\v38\\v94'")()..v34(v242) end
-if v234 then v234(v4("return '\\v57\\v58\\v57\\v16\\v57\\v59\\v57\\v94\\v7\\v27\\v14\\v41\\v10\\v18\\v129\\v7\\v40\\v41\\v44\\v94\\v26\\v23\\v18\\v19\\v18\\v7\\v23\\v40\\v41\\v44\\v44\\v44'")(),v236.v237(80,255,120)) end
-v244.v245(0.25)
-local v68,v246=v70(v202);v202=nil
-if not v68 then v73.v197=nil;return false,v4("return '\\v126\\v10\\v10\\v41\\v94\\v7\\v41\\v94\\v18\\v23\\v18\\v19\\v18\\v7\\v10\\v94\\v13\\v27\\v71\\v38\\v94'")()..v34(v246) end
+local function _0x9EBC(authResponse,_0x6F6D)
+local _0xC1CC,_0xEEB0=_0x18DB(authResponse);if not _0xC1CC then return false,_0xEEB0 end
+if _0x6F6D then _0x6F6D("Solicitando ticket seguro...",Color3.fromRGB(255,210,80)) end
+local _0x07EB,_0xCEB1=_0x52D3(_0xC1CC.sessionToken)
+if not _0x07EB or _0x07EB.success~=true or type(_0x07EB.ticket)~="string"then return false,(_0x07EB and _0x07EB.message) or _0xCEB1 or"Falha ao emitir ticket"end
+if _0x6F6D then _0x6F6D("Baixando build autorizada...",Color3.fromRGB(255,210,80)) end
+local _0xE7F8,_0xCB3D=_0xFAA5(_0x07EB.ticket,_0xC1CC.sessionToken);if not _0xE7F8 then return false,_0xCB3D end
+if type(loadstring)~="function"then return false,"Este ambiente nao possui loadstring."end
+local _0x1E31,_0x314D=loadstring(_0xE7F8,"ARASAKA_PAYLOAD");_0xE7F8=nil
+if not _0x1E31 then return false,"Falha ao compilar payload: "..tostring(_0x314D) end
+if _0x6F6D then _0x6F6D("ARASAKA autorizado. Iniciando...",Color3.fromRGB(80,255,120)) end
+task.wait(0.25)
+local _0xF43B,_0x0D0D=pcall(_0x1E31);_0x1E31=nil
+if not _0xF43B then _0xB413.ARASAKA_BOOTSTRAP_CONTEXT=nil;return false,"Erro ao iniciar Hub: "..tostring(_0x0D0D) end
 return true
-end
-local v247=v30:v248(v4("return '\\v57\\v10\\v7\\v11\\v7\\v167\\v7\\v16\\v9\\v19\\v27\\v10\\v9\\v205\\v41\\v7\\v40\\v9\\v10'")());if v247 then v247:v249() end
-local v250=v251.v252(v4("return '\\v16\\v19\\v10\\v9\\v9\\v23\\v32\\v27\\v18'")());v250.v253=v4("return '\\v57\\v10\\v7\\v11\\v7\\v167\\v7\\v16\\v9\\v19\\v27\\v10\\v9\\v205\\v41\\v7\\v40\\v9\\v10'")();v250.v254=false;v250.v255=true;v250.v256=1000000;v250.v257=v30
-local v258=v251.v252(v4("return '\\v93\\v10\\v7\\v45\\v9'")());v258.v259=v260.v261(1,1);v258.v262=v236.v237(2,2,3);v258.v263=0.06;v258.v264=0;v258.v257=v250
-local v265=v251.v252(v4("return '\\v93\\v10\\v7\\v45\\v9'")());v265.v266=v267.v252(.5,.5);v265.v268=v260.v261(.5,.5);v265.v259=v260.v252(0,420,0,280);v265.v262=v236.v237(10,10,13);v265.v264=0;v265.v257=v258;v251.v252(v4("return '\\v25\\v26\\v91\\v41\\v10\\v23\\v9\\v10'")(),v265).v269=v270.v252(0,7)
-local v271=v251.v252(v4("return '\\v25\\v26\\v16\\v14\\v10\\v41\\v167\\v9'")(),v265);v271.v272=v236.v237(190,25,25);v271.v273=1.5
-local v274=v251.v252(v4("return '\\v93\\v10\\v7\\v45\\v9'")());v274.v259=v260.v252(0,4,1,0);v274.v262=v236.v237(210,35,35);v274.v264=0;v274.v257=v265
-local v275=v251.v252(v4("return '\\v21\\v9\\v127\\v14\\v205\\v7\\v71\\v9\\v6'")());v275.v263=1;v275.v268=v260.v252(0,20,0,18);v275.v259=v260.v252(1,-40,0,28);v275.v276=v104.v276.v277;v275.v278=v4("return '\\v57\\v58\\v57\\v16\\v57\\v59\\v57\\v94\\v39\\v39\\v94\\v16\\v126\\v91\\v25\\v58\\v126\\v94\\v57\\v91\\v91\\v126\\v16\\v16'")();v275.v279=16;v275.v280=v236.v237(245,245,245);v275.v281=v104.v281.v282;v275.v257=v265
-local v283=v251.v252(v4("return '\\v21\\v9\\v127\\v14\\v205\\v7\\v71\\v9\\v6'")());v283.v263=1;v283.v268=v260.v252(0,20,0,47);v283.v259=v260.v252(1,-40,0,20);v283.v276=v104.v276.v284;v283.v278=v4("return '\\v25\\v26\\v204\\v94'")()..v33..v4("return '\\v94\\v39\\v39\\v94'")()..v117.v206(v120);v283.v279=10;v283.v280=v236.v237(115,115,120);v283.v281=v104.v281.v282;v283.v257=v265
-local v97=v251.v252(v4("return '\\v21\\v9\\v127\\v14\\v205\\v7\\v71\\v9\\v6'")());v97.v263=1;v97.v268=v260.v252(0,20,0,76);v97.v259=v260.v252(1,-40,0,48);v97.v276=v104.v276.v285;v97.v278=v4("return '\\v286\\v7\\v6\\v18\\v40\\v7\\v23\\v40\\v41\\v94\\v6\\v18\\v19\\v9\\v23\\v19\\v7\\v44\\v44\\v44'")();v97.v279=13;v97.v287=true;v97.v280=v236.v237(190,190,195);v97.v281=v104.v281.v282;v97.v257=v265
-local v288=v251.v252(v4("return '\\v21\\v9\\v127\\v14\\v240\\v41\\v127'")());v288.v268=v260.v252(0,20,0,134);v288.v259=v260.v252(1,-40,0,42);v288.v262=v236.v237(20,20,25);v288.v264=0;v288.v289=false;v288.v290=v4("return '\\v25\\v26\\v204\\v94\\v6\\v18\\v71\\v9\\v10\\v7\\v40\\v41\\v94\\v15\\v9\\v6\\v41\\v94\\v57\\v40\\v45\\v18\\v23\\v94\\v41\\v27\\v94\\v40\\v18\\v135\\v18\\v14\\v9\\v94\\v11\\v27\\v7\\v94\\v167\\v9\\v8'")();v288.v278=v4("return ''")();v288.v280=v236.v237(245,245,245);v288.v291=v236.v237(95,95,100);v288.v276=v104.v276.v285;v288.v279=13;v288.v257=v265;v251.v252(v4("return '\\v25\\v26\\v91\\v41\\v10\\v23\\v9\\v10'")(),v288).v269=v270.v252(0,5)
-local v292=v251.v252(v4("return '\\v21\\v9\\v127\\v14\\v240\\v27\\v14\\v14\\v41\\v23'")());v292.v268=v260.v252(0,20,0,188);v292.v259=v260.v252(1,-40,0,40);v292.v262=v236.v237(150,20,25);v292.v264=0;v292.v278=v4("return '\\v286\\v57\\v205\\v26\\v204\\v57\\v58\\v94\\v39\\v94\\v57\\v21\\v26\\v286\\v57\\v58'")();v292.v280=v236.v237(255,255,255);v292.v276=v104.v276.v277;v292.v279=12;v292.v257=v265;v251.v252(v4("return '\\v25\\v26\\v91\\v41\\v10\\v23\\v9\\v10'")(),v292).v269=v270.v252(0,5)
-local v293=v251.v252(v4("return '\\v21\\v9\\v127\\v14\\v205\\v7\\v71\\v9\\v6'")());v293.v263=1;v293.v268=v260.v252(0,20,0,238);v293.v259=v260.v252(1,-40,0,24);v293.v276=v104.v276.v284;v293.v278=v4("return '\\v57\\v19\\v9\\v11\\v11\\v41\\v94\\v15\\v41\\v10\\v94\\v25\\v26\\v204\\v94\\v6\\v18\\v71\\v9\\v10\\v7\\v40\\v41\\v94\\v23\\v41\\v94\\v57\\v40\\v45\\v18\\v23\\v94\\v99\\v25\\v94\\v15\\v41\\v10\\v94\\v167\\v9\\v8\\v94\\v39\\v39\\v94\\v45\\v27\\v6\\v14\\v18\\v42\\v19\\v41\\v23\\v14\\v7\\v94\\v6\\v18\\v71\\v9\\v10\\v7\\v40\\v41'")();v293.v279=9;v293.v280=v236.v237(95,95,100);v293.v281=v104.v281.v282;v293.v257=v265
-local function v234(v294,v295) v97.v278=v34(v294 or v4("return ''")());if v295 then v97.v280=v295 end end
-local v296=false
-local function v297(v298) v296=v298==true;v292.v299=not v296;v292.v300=not v296;v292.v278=v296 and v4("return '\\v5\\v58\\v99\\v91\\v126\\v16\\v16\\v57\\v195\\v204\\v99\\v44\\v44\\v44'")() or v4("return '\\v286\\v57\\v205\\v26\\v204\\v57\\v58\\v94\\v39\\v94\\v57\\v21\\v26\\v286\\v57\\v58'")() end
-local function v301() v20:v302(v265,v303.v252(.18),{v263=1}):v304();v244.v245(.2);if v250 then v250:v249() end end
-local function v305(v306)
-if v296 then return end
-v297(true)
-v234(v4("return '\\v286\\v7\\v6\\v18\\v40\\v7\\v23\\v40\\v41\\v94\\v25\\v26\\v204\\v44\\v44\\v44'")(),v236.v237(255,210,80))
-local v87,v111=v163()
-if v87 and v87.v307==true then
-if v250 then v250.v308=false end
-local v309,v310=v232(v87,v234)
-if not v309 then
-if v250 then v250.v308=true end
-v234(v310 or v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v18\\v23\\v18\\v19\\v18\\v7\\v10\\v94\\v13\\v27\\v71\\v44'")(),v236.v237(255,95,95))
-v297(false)
+endlocal _0xA948=_0xA993:FindFirstChild("ArasakaSecureLoader");if _0xA948 then _0xA948:Destroy() end
+local _0xDA90=Instance.new("ScreenGui");_0xDA90.Name="ArasakaSecureLoader";_0xDA90.ResetOnSpawn=false;_0xDA90.IgnoreGuiInset=true;_0xDA90.DisplayOrder=1000000;_0xDA90.Parent=_0xA993
+local _0xF396=Instance.new("Frame");_0xF396.Size=UDim2.fromScale(1,1);_0xF396.BackgroundColor3=Color3.fromRGB(2,2,3);_0xF396.BackgroundTransparency=0.06;_0xF396.BorderSizePixel=0;_0xF396.Parent=_0xDA90
+local _0xFEF1=Instance.new("Frame");_0xFEF1.AnchorPoint=Vector2.new(.5,.5);_0xFEF1.Position=UDim2.fromScale(.5,.5);_0xFEF1.Size=UDim2.new(0,420,0,280);_0xFEF1.BackgroundColor3=Color3.fromRGB(10,10,13);_0xFEF1.BorderSizePixel=0;_0xFEF1.Parent=_0xF396;Instance.new("UICorner",_0xFEF1).CornerRadius=UDim.new(0,7)
+local _0xF18B=Instance.new("UIStroke",_0xFEF1);_0xF18B.Color=Color3.fromRGB(190,25,25);_0xF18B.Thickness=1.5
+local _0xD070=Instance.new("Frame");_0xD070.Size=UDim2.new(0,4,1,0);_0xD070.BackgroundColor3=Color3.fromRGB(210,35,35);_0xD070.BorderSizePixel=0;_0xD070.Parent=_0xFEF1
+local _0x1912=Instance.new("TextLabel");_0x1912.BackgroundTransparency=1;_0x1912.Position=UDim2.new(0,20,0,18);_0x1912.Size=UDim2.new(1,-40,0,28);_0x1912.Font=Enum.Font.GothamBold;_0x1912.Text="ARASAKA // SECURE ACCESS";_0x1912.TextSize=16;_0x1912.TextColor3=Color3.fromRGB(245,245,245);_0x1912.TextXAlignment=Enum.TextXAlignment.Left;_0x1912.Parent=_0xFEF1
+local _0x8AB2=Instance.new("TextLabel");_0x8AB2.BackgroundTransparency=1;_0x8AB2.Position=UDim2.new(0,20,0,47);_0x8AB2.Size=UDim2.new(1,-40,0,20);_0x8AB2.Font=Enum.Font.Code;_0x8AB2.Text="UID "..UID.." // "..string.upper(_0xB44F);_0x8AB2.TextSize=10;_0x8AB2.TextColor3=Color3.fromRGB(115,115,120);_0x8AB2.TextXAlignment=Enum.TextXAlignment.Left;_0x8AB2.Parent=_0xFEF1
+local _0x5094=Instance.new("TextLabel");_0x5094.BackgroundTransparency=1;_0x5094.Position=UDim2.new(0,20,0,76);_0x5094.Size=UDim2.new(1,-40,0,48);_0x5094.Font=Enum.Font.Gotham;_0x5094.Text="Validando licenca...";_0x5094.TextSize=13;_0x5094.TextWrapped=true;_0x5094.TextColor3=Color3.fromRGB(190,190,195);_0x5094.TextXAlignment=Enum.TextXAlignment.Left;_0x5094.Parent=_0xFEF1
+local _0x9DA5=Instance.new("TextBox");_0x9DA5.Position=UDim2.new(0,20,0,134);_0x9DA5.Size=UDim2.new(1,-40,0,42);_0x9DA5.BackgroundColor3=Color3.fromRGB(20,20,25);_0x9DA5.BorderSizePixel=0;_0x9DA5.ClearTextOnFocus=false;_0x9DA5.PlaceholderText="UID liberado pelo Admin ou digite sua key";_0x9DA5.Text="";_0x9DA5.TextColor3=Color3.fromRGB(245,245,245);_0x9DA5.PlaceholderColor3=Color3.fromRGB(95,95,100);_0x9DA5.Font=Enum.Font.Gotham;_0x9DA5.TextSize=13;_0x9DA5.Parent=_0xFEF1;Instance.new("UICorner",_0x9DA5).CornerRadius=UDim.new(0,5)
+local _0xEA4D=Instance.new("TextButton");_0xEA4D.Position=UDim2.new(0,20,0,188);_0xEA4D.Size=UDim2.new(1,-40,0,40);_0xEA4D.BackgroundColor3=Color3.fromRGB(150,20,25);_0xEA4D.BorderSizePixel=0;_0xEA4D.Text="VALIDAR / ATIVAR";_0xEA4D.TextColor3=Color3.fromRGB(255,255,255);_0xEA4D.Font=Enum.Font.GothamBold;_0xEA4D.TextSize=12;_0xEA4D.Parent=_0xFEF1;Instance.new("UICorner",_0xEA4D).CornerRadius=UDim.new(0,5)
+local _0x119E=Instance.new("TextLabel");_0x119E.BackgroundTransparency=1;_0x119E.Position=UDim2.new(0,20,0,238);_0x119E.Size=UDim2.new(1,-40,0,24);_0x119E.Font=Enum.Font.Code;_0x119E.Text="Acesso por UID liberado no Admin OU por key // multi-conta liberado";_0x119E.TextSize=9;_0x119E.TextColor3=Color3.fromRGB(95,95,100);_0x119E.TextXAlignment=Enum.TextXAlignment.Left;_0x119E.Parent=_0xFEF1
+local function _0x6F6D(t,c) _0x5094.Text=tostring(t or"");if c then _0x5094.TextColor3=c end end
+local _0x900A=false
+local function _0x1E97(v) _0x900A=v==true;_0xEA4D.Active=not _0x900A;_0xEA4D.AutoButtonColor=not _0x900A;_0xEA4D.Text=_0x900A and"PROCESSANDO..."or"VALIDAR / ATIVAR"end
+local function _0x8E38() _0xA808:Create(_0xFEF1,TweenInfo.new(.18),{BackgroundTransparency=1}):Play();task.wait(.2);if _0xDA90 then _0xDA90:Destroy() end end
+local function _0x6F48(inputText)
+if _0x900A then return end
+_0x1E97(true)
+_0x6F6D("Validando UID...",Color3.fromRGB(255,210,80))
+local _0x1238,_0x4B18=_0xFFBB()
+if _0x1238 and _0x1238.authorized==true thenif _0xDA90 then _0xDA90.Enabled=false end
+local _0x5CA8,_0xDD69=_0x9EBC(_0x1238,_0x6F6D)
+if not _0x5CA8 then
+if _0xDA90 then _0xDA90.Enabled=true end
+_0x6F6D(_0xDD69 or"Falha ao iniciar Hub.",Color3.fromRGB(255,95,95))
+_0x1E97(false)
 return
 end
-if v250 then v250:v249() end
+if _0xDA90 then _0xDA90:Destroy() end
 return
 end
-if v306 and v306~=v4("return ''")() then
-v234(v4("return '\\v57\\v14\\v18\\v17\\v7\\v23\\v40\\v41\\v94\\v167\\v9\\v8\\v94\\v15\\v7\\v10\\v7\\v94\\v9\\v11\\v14\\v9\\v94\\v25\\v26\\v204\\v44\\v44\\v44'")(),v236.v237(255,210,80))
-local v311,v312=v165(v306)
-if not v311 then
-v234(v312 or v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v7\\v14\\v18\\v17\\v7\\v10\\v94\\v167\\v9\\v8\\v44'")(),v236.v237(255,95,95))
-v297(false)
+if inputText and inputText~=""then
+_0x6F6D("Ativando key para este UID...",Color3.fromRGB(255,210,80))
+local _0x9852,_0x5F0C=_0x9CF4(inputText)
+if not _0x9852 then
+_0x6F6D(_0x5F0C or"Falha ao ativar key.",Color3.fromRGB(255,95,95))
+_0x1E97(false)
 return
 end
-if v311.v150~=true then
-v234(v311.v151 or v4("return '\\v59\\v9\\v8\\v94\\v10\\v9\\v19\\v27\\v11\\v7\\v40\\v7\\v44'")(),v236.v237(255,95,95))
-v297(false)
+if _0x9852.success~=true then
+_0x6F6D(_0x9852.message or"Key recusada.",Color3.fromRGB(255,95,95))
+_0x1E97(false)
 return
 end
-v234(v4("return '\\v205\\v18\\v19\\v9\\v23\\v19\\v7\\v94\\v7\\v14\\v18\\v17\\v7\\v40\\v7\\v44\\v94\\v91\\v10\\v18\\v7\\v23\\v40\\v41\\v94\\v11\\v9\\v11\\v11\\v7\\v41\\v44\\v44\\v44'")(),v236.v237(255,210,80))
-v87,v111=v163()
-if v87 and v87.v307==true then
-if v250 then v250.v308=false end
-local v309,v310=v232(v87,v234)
-if not v309 then
-if v250 then v250.v308=true end
-v234(v310 or v4("return '\\v93\\v7\\v6\\v37\\v7\\v94\\v7\\v41\\v94\\v18\\v23\\v18\\v19\\v18\\v7\\v10\\v94\\v13\\v27\\v71\\v44'")(),v236.v237(255,95,95))
-v297(false)
+_0x6F6D("Licenca ativada. Criando sessao...",Color3.fromRGB(255,210,80))
+_0x1238,_0x4B18=_0xFFBB()
+if _0x1238 and _0x1238.authorized==true thenif _0xDA90 then _0xDA90.Enabled=false end
+local _0x5CA8,_0xDD69=_0x9EBC(_0x1238,_0x6F6D)
+if not _0x5CA8 then
+if _0xDA90 then _0xDA90.Enabled=true end
+_0x6F6D(_0xDD69 or"Falha ao iniciar Hub.",Color3.fromRGB(255,95,95))
+_0x1E97(false)
 return
 end
-if v250 then v250:v249() end
+if _0xDA90 then _0xDA90:Destroy() end
 return
 end
 end
-if not v87 then
-v234(v111 or v4("return '\\v16\\v9\\v10\\v17\\v18\\v40\\v41\\v10\\v94\\v14\\v9\\v45\\v15\\v41\\v10\\v7\\v10\\v18\\v7\\v45\\v9\\v23\\v14\\v9\\v94\\v18\\v23\\v40\\v18\\v11\\v15\\v41\\v23\\v18\\v17\\v9\\v6\\v44'")(),v236.v237(255,95,95))
+if not _0x1238 then
+_0x6F6D(_0x4B18 or"Servidor temporariamente indisponivel.",Color3.fromRGB(255,95,95))
 else
-v234(v87.v151 or v4("return '\\v25\\v26\\v204\\v94\\v11\\v9\\v45\\v94\\v7\\v19\\v9\\v11\\v11\\v41\\v44\\v94\\v205\\v18\\v71\\v9\\v10\\v9\\v94\\v41\\v94\\v25\\v26\\v204\\v94\\v23\\v41\\v94\\v57\\v40\\v45\\v18\\v23\\v94\\v41\\v27\\v94\\v40\\v18\\v135\\v18\\v14\\v9\\v94\\v27\\v45\\v7\\v94\\v167\\v9\\v8\\v44'")(),v236.v237(255,170,70))
+_0x6F6D(_0x1238.message or"UID sem acesso. Libere o UID no Admin ou digite uma key.",Color3.fromRGB(255,170,70))
 end
-v297(false)
+_0x1E97(false)
 end
-v292.v313:v314(function() v305(v288.v278) end)
-v244.v315(function() v244.v245(.2); v305(nil) end)
+_0xEA4D.MouseButton1Click:Connect(function() _0x6F48(_0x9DA5.Text) end)
+task.spawn(function() task.wait(.2); _0x6F48(nil) end)
