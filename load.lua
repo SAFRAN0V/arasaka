@@ -5,405 +5,405 @@
 -- Android/iOS: usa token de instalacao persistente salvo pelo executor.
 -- ============================================================
 
-local _0x1375 = game:GetService("Players")
-local _0x0FFE = game:GetService("HttpService")
-local _0x8F76 = game:GetService("TweenService")
-local _0xBBFD = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
-local _0x4A41 = _0x1375.LocalPlayer
-local _0xB041 = _0x4A41:WaitForChild("PlayerGui")
-local _0x7E28 = tostring(_0x4A41.UserId)
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+local UID = tostring(Player.UserId)
 
-local _0xD1F5 = "https://chatprivado-cwu3.onrender.com"
-local _0x0AF8 = "6.0.0"
-local _0x1526 = _0x0FFE:GenerateGUID(false)
-local _0xEDF9 = "http://127.0.0.1:27183"
-local _0x42DD = "ARASAKA"
-local _0xFB45 = _0x42DD .. "/device.json"
-local _0xFB00 = _0x42DD .. "/device_" .. _0x7E28 .. ".json"
+local API = "https://chatprivado-cwu3.onrender.com"
+local VERSION = "6.0.0"
+local CLIENT_INSTANCE_ID = HttpService:GenerateGUID(false)
+local COMPANION_URL = "http://127.0.0.1:27183"
+local DEVICE_DIR = "ARASAKA"
+local LEGACY_DEVICE_FILE = DEVICE_DIR .. "/device.json"
+local DEVICE_FILE = DEVICE_DIR .. "/device_" .. UID .. ".json"
 
-local function _0x820F()
+local function getEnv()
     if type(getgenv) == "function" then
-        local _0x9605, _0x04F3 = pcall(getgenv)
-        if _0x9605 and type(_0x04F3) == "table" then return _0x04F3 end
+        local ok, env = pcall(getgenv)
+        if ok and type(env) == "table" then return env end
     end
     return _G
 end
-local _0x0DE1 = _0x820F()
+local ENV = getEnv()
 
-local function _0xCDBC()
+local function findRequest()
     return request or http_request or (syn and syn.request) or (Fluxus and Fluxus.request) or (http and http.request)
 end
 
-local function _0xEB0D(method, url, bodyTable)
-    local _0x6619 = _0xCDBC()
-    local _0x01A5 = bodyTable and _0x0FFE:JSONEncode(bodyTable) or nil
-    if _0x6619 then
-        local _0x9605, _0xECEF = pcall(function()
-            return _0x6619({Url=url,Method=method,Headers={["Content-Type"]="application/json",["Cache-Control"]="no-cache"},Body=_0x01A5})
+local function requestRaw(method, url, bodyTable)
+    local req = findRequest()
+    local body = bodyTable and HttpService:JSONEncode(bodyTable) or nil
+    if req then
+        local ok, response = pcall(function()
+            return req({Url=url,Method=method,Headers={["Content-Type"]="application/json",["Cache-Control"]="no-cache"},Body=body})
         end)
-        if not _0x9605 or type(_0xECEF) ~= "table" then return nil,nil,"Falha de rede" end
-        return tonumber(_0xECEF.StatusCode or _0xECEF.Status or _0xECEF.status_code) or 0, tostring(_0xECEF.Body or _0xECEF.body or ""), nil
+        if not ok or type(response) ~= "table" then return nil,nil,"Falha de rede" end
+        return tonumber(response.StatusCode or response.Status or response.status_code) or 0, tostring(response.Body or response.body or ""), nil
     end
     if method == "POST" then
-        local _0x9605, _0x381E = pcall(function() return game:HttpPost(url, _0x01A5 or "{}", Enum.HttpContentType.ApplicationJson) end)
-        if not _0x9605 then return nil,nil,"Falha de rede" end
-        return 200,tostring(_0x381E),nil
+        local ok, raw = pcall(function() return game:HttpPost(url, body or "{}", Enum.HttpContentType.ApplicationJson) end)
+        if not ok then return nil,nil,"Falha de rede" end
+        return 200,tostring(raw),nil
     end
     return nil,nil,"Ambiente sem request HTTP compativel"
 end
 
-local function _0x5F40(method, path, bodyTable)
-    local _0xDB33, _0x381E, _0x55CF = _0xEB0D(method, _0xD1F5 .. path, bodyTable)
-    if not _0x381E then return nil, _0x55CF or "Falha de rede", _0xDB33 end
-    local _0x9605, _0xD1A6 = pcall(function() return _0x0FFE:JSONDecode(_0x381E) end)
-    if not _0x9605 or type(_0xD1A6) ~= "table" then return nil,"Resposta invalida do servidor",_0xDB33 end
-    return _0xD1A6,nil,_0xDB33
+local function requestJson(method, path, bodyTable)
+    local status, raw, err = requestRaw(method, API .. path, bodyTable)
+    if not raw then return nil, err or "Falha de rede", status end
+    local ok, decoded = pcall(function() return HttpService:JSONDecode(raw) end)
+    if not ok or type(decoded) ~= "table" then return nil,"Resposta invalida do servidor",status end
+    return decoded,nil,status
 end
 
-local function _0xF3E8()
-    local _0x9605, _0x7CD8 = pcall(function() return tostring(_0xBBFD:GetPlatform()) end)
-    _0x7CD8 = _0x9605 and string.lower(_0x7CD8 or "") or ""
-    if string.find(_0x7CD8,"windows",1,true) then return "windows" end
-    if string.find(_0x7CD8,"android",1,true) then return "android" end
-    if string.find(_0x7CD8,"ios",1,true) then return "ios" end
+local function detectPlatform()
+    local ok, p = pcall(function() return tostring(UserInputService:GetPlatform()) end)
+    p = ok and string.lower(p or "") or ""
+    if string.find(p,"windows",1,true) then return "windows" end
+    if string.find(p,"android",1,true) then return "android" end
+    if string.find(p,"ios",1,true) then return "ios" end
     return "other"
 end
 
-local _0xA00D = _0xF3E8()
+local PLATFORM = detectPlatform()
 
-local function _0xA5FD()
+local function storageAvailable()
     return type(readfile)=="function" and type(writefile)=="function"
 end
 
-local function _0xBC3A(_0xF05E)
-    if not _0xA5FD() then return false,"Este executor nao oferece readfile/writefile para salvar a instalacao." end
-    if type(makefolder)=="function" then pcall(function() makefolder(_0x42DD) end) end
-    local _0x9605, _0x381E = pcall(function() return _0x0FFE:JSONEncode(_0xF05E) end)
-    if not _0x9605 then return false,"Falha ao serializar dispositivo." end
-    local _0xE2B4, _0xD1D5 = pcall(function() writefile(_0xFB00, _0x381E) end)
-    if not _0xE2B4 then return false,"Falha ao salvar dispositivo: "..tostring(_0xD1D5) end
+local function saveDevice(state)
+    if not storageAvailable() then return false,"Este executor nao oferece readfile/writefile para salvar a instalacao." end
+    if type(makefolder)=="function" then pcall(function() makefolder(DEVICE_DIR) end) end
+    local ok, raw = pcall(function() return HttpService:JSONEncode(state) end)
+    if not ok then return false,"Falha ao serializar dispositivo." end
+    local wok, werr = pcall(function() writefile(DEVICE_FILE, raw) end)
+    if not wok then return false,"Falha ao salvar dispositivo: "..tostring(werr) end
     return true
 end
 
-local function _0xD9DB(path)
-    local _0xCFF5 = false
+local function readDeviceFile(path)
+    local exists = false
     if type(isfile) == "function" then
-        pcall(function() _0xCFF5 = isfile(path) end)
+        pcall(function() exists = isfile(path) end)
     else
-        local _0x9605 = pcall(function() readfile(path) end)
-        _0xCFF5 = _0x9605
+        local ok = pcall(function() readfile(path) end)
+        exists = ok
     end
-    if not _0xCFF5 then return nil end
+    if not exists then return nil end
 
-    local _0x9605, _0x381E = pcall(function() return readfile(path) end)
-    if not _0x9605 or type(_0x381E) ~= "string" then return nil end
+    local ok, raw = pcall(function() return readfile(path) end)
+    if not ok or type(raw) ~= "string" then return nil end
 
-    local _0x50D6, _0xD1A6 = pcall(function() return _0x0FFE:JSONDecode(_0x381E) end)
-    if not _0x50D6 or type(_0xD1A6) ~= "table" then return nil end
-    if tostring(_0xD1A6.uid or "") ~= _0x7E28 or type(_0xD1A6.deviceId) ~= "string" then return nil end
+    local dok, decoded = pcall(function() return HttpService:JSONDecode(raw) end)
+    if not dok or type(decoded) ~= "table" then return nil end
+    if tostring(decoded.uid or "") ~= UID or type(decoded.deviceId) ~= "string" then return nil end
 
-    _0xD1A6.platform = _0xA00D
-    return _0xD1A6
+    decoded.platform = PLATFORM
+    return decoded
 end
 
-local function _0x11A1()
-    local _0xF05E = {uid=_0x7E28,platform=_0xA00D,deviceId=_0x0FFE:GenerateGUID(false),installToken=nil}
-    if not _0xA5FD() then return _0xF05E,false end
+local function loadDevice()
+    local state = {uid=UID,platform=PLATFORM,deviceId=HttpService:GenerateGUID(false),installToken=nil}
+    if not storageAvailable() then return state,false end
 
     -- V6 MULTI-ACCOUNT: cada UID possui seu proprio device/installToken.
-    local _0x6658 = _0xD9DB(_0xFB00)
-    if _0x6658 then
-        return _0x6658,true
+    local perUser = readDeviceFile(DEVICE_FILE)
+    if perUser then
+        return perUser,true
     end
 
     -- Migracao transparente do loader antigo: se device.json pertencer a
     -- esta conta, copia para device_<UID>.json sem perder o cadastro.
-    local _0x0574 = _0xD9DB(_0xFB45)
-    if _0x0574 then
-        _0xF05E = _0x0574
-        pcall(function() _0xBC3A(_0xF05E) end)
+    local legacy = readDeviceFile(LEGACY_DEVICE_FILE)
+    if legacy then
+        state = legacy
+        pcall(function() saveDevice(state) end)
     end
 
-    return _0xF05E,true
+    return state,true
 end
 
-local _0x0AE5, _0x9885 = _0x11A1()
+local Device, HAS_STORAGE = loadDevice()
 
-local function _0xC47A(path, bodyTable)
-    local _0xDB33, _0x381E, _0x55CF = _0xEB0D("POST", _0xEDF9 .. path, bodyTable)
-    if not _0x381E or (_0xDB33~=0 and _0xDB33~=200) then return nil,_0x55CF or "ARASAKA Auth offline" end
-    local _0x9605, _0xD1A6=pcall(function() return _0x0FFE:JSONDecode(_0x381E) end)
-    if not _0x9605 or type(_0xD1A6)~="table" then return nil,"Resposta invalida do ARASAKA Auth" end
-    return _0xD1A6,nil
+local function localCompanion(path, bodyTable)
+    local status, raw, err = requestRaw("POST", COMPANION_URL .. path, bodyTable)
+    if not raw or (status~=0 and status~=200) then return nil,err or "ARASAKA Auth offline" end
+    local ok, decoded=pcall(function() return HttpService:JSONDecode(raw) end)
+    if not ok or type(decoded)~="table" then return nil,"Resposta invalida do ARASAKA Auth" end
+    return decoded,nil
 end
 
-local function _0x8C81()
-    if _0xA00D~="windows" then return true end
-    local _0xAE28,_0x55CF=_0xC47A("/register",{api=_0xD1F5,uid=_0x7E28,deviceId=_0x0AE5.deviceId,installToken=_0x0AE5.installToken})
-    if not _0xAE28 or _0xAE28.success~=true then return false,(_0xAE28 and _0xAE28.message) or _0x55CF or "Abra ARASAKA Auth.exe" end
+local function registerCompanion()
+    if PLATFORM~="windows" then return true end
+    local d,err=localCompanion("/register",{api=API,uid=UID,deviceId=Device.deviceId,installToken=Device.installToken})
+    if not d or d.success~=true then return false,(d and d.message) or err or "Abra ARASAKA Auth.exe" end
     return true
 end
 
-local function _0x1937(useSessionToken)
-    local _0x01A5={uid=_0x7E28,version=_0x0AF8,deviceId=_0x0AE5.deviceId}
-    if useSessionToken then _0x01A5.sessionToken=useSessionToken else _0x01A5.installToken=_0x0AE5.installToken end
-    local _0x74BF,_0x55CF=_0x5F40("POST","/api/device/challenge",_0x01A5)
-    if not _0x74BF then return nil,_0x55CF end
-    if _0x74BF.required~=true then return {required=false} end
-    local _0xFD3F,_0xECB0=_0xC47A("/sign",{challengeId=_0x74BF.challengeId,nonce=_0x74BF.nonce,uid=_0x7E28,deviceId=_0x0AE5.deviceId})
-    if not _0xFD3F or _0xFD3F.success~=true or type(_0xFD3F.signature)~="string" then return nil,(_0xFD3F and _0xFD3F.message) or _0xECB0 or "ARASAKA Auth nao respondeu" end
-    return {required=true,challengeId=_0x74BF.challengeId,signature=_0xFD3F.signature}
+local function getCompanionProof(useSessionToken)
+    local body={uid=UID,version=VERSION,deviceId=Device.deviceId}
+    if useSessionToken then body.sessionToken=useSessionToken else body.installToken=Device.installToken end
+    local challenge,err=requestJson("POST","/api/device/challenge",body)
+    if not challenge then return nil,err end
+    if challenge.required~=true then return {required=false} end
+    local signed,signErr=localCompanion("/sign",{challengeId=challenge.challengeId,nonce=challenge.nonce,uid=UID,deviceId=Device.deviceId})
+    if not signed or signed.success~=true or type(signed.signature)~="string" then return nil,(signed and signed.message) or signErr or "ARASAKA Auth nao respondeu" end
+    return {required=true,challengeId=challenge.challengeId,signature=signed.signature}
 end
 
-local function _0x82C5()
-    return _0x5F40("POST","/api/bootstrap",{
-        uid=_0x7E28,
-        version=_0x0AF8,
-        fingerprint=_0x1526
+local function bootstrap()
+    return requestJson("POST","/api/bootstrap",{
+        uid=UID,
+        version=VERSION,
+        fingerprint=CLIENT_INSTANCE_ID
     })
 end
 
-local function _0x2A22(keyText)
-    return _0x5F40("POST","/api/redeem-key",{key=keyText,uid=_0x7E28,version=_0x0AF8})
+local function redeemKey(keyText)
+    return requestJson("POST","/api/redeem-key",{key=keyText,uid=UID,version=VERSION})
 end
 
-local function _0x354A(code)
-    return _0x5F40("POST","/api/device/enroll-pair",{pairCode=code,uid=_0x7E28,version=_0x0AF8,platform=_0xA00D,deviceId=_0x0AE5.deviceId})
+local function enrollPair(code)
+    return requestJson("POST","/api/device/enroll-pair",{pairCode=code,uid=UID,version=VERSION,platform=PLATFORM,deviceId=Device.deviceId})
 end
 
-local function _0x3309(_0xECEF)
-    if type(_0xECEF)~="table" or type(_0xECEF.installToken)~="string" or _0xECEF.installToken=="" then return false,"Servidor nao entregou token da instalacao." end
-    _0x0AE5.uid=_0x7E28;_0x0AE5.platform=_0xA00D;_0x0AE5.deviceId=_0xECEF.deviceId or _0x0AE5.deviceId;_0x0AE5.installToken=_0xECEF.installToken
-    local _0x9605,_0x55CF=_0xBC3A(_0x0AE5)
-    if not _0x9605 then return false,_0x55CF end
-    if _0xECEF.companionRequired==true then
-        local _0xA080,_0x25A4=_0x8C81()
-        if not _0xA080 then return false,_0x25A4 end
+local function acceptEnrollment(response)
+    if type(response)~="table" or type(response.installToken)~="string" or response.installToken=="" then return false,"Servidor nao entregou token da instalacao." end
+    Device.uid=UID;Device.platform=PLATFORM;Device.deviceId=response.deviceId or Device.deviceId;Device.installToken=response.installToken
+    local ok,err=saveDevice(Device)
+    if not ok then return false,err end
+    if response.companionRequired==true then
+        local cok,cerr=registerCompanion()
+        if not cok then return false,cerr end
     end
     return true
 end
 
-local function _0x29A4(sessionToken)
-    return _0x5F40("POST","/api/script-ticket",{uid=_0x7E28,version=_0x0AF8,sessionToken=sessionToken})
+local function requestScriptTicket(sessionToken)
+    return requestJson("POST","/api/script-ticket",{uid=UID,version=VERSION,sessionToken=sessionToken})
 end
 
-local function _0x4821(ticket,sessionToken)
-    local _0xDB33,_0xA218,_0x55CF=_0xEB0D("POST",_0xD1F5.."/api/script",{ticket=ticket,uid=_0x7E28,version=_0x0AF8,sessionToken=sessionToken})
-    if not _0xA218 then return nil,_0x55CF or "Falha ao baixar Hub" end
-    if _0xDB33~=0 and _0xDB33~=200 then return nil,"Servidor recusou o download (HTTP "..tostring(_0xDB33)..")" end
-    if #_0xA218<100 then return nil,"Payload invalido: "..tostring(_0xA218) end
-    return _0xA218,nil
+local function downloadScript(ticket,sessionToken)
+    local status,source,err=requestRaw("POST",API.."/api/script",{ticket=ticket,uid=UID,version=VERSION,sessionToken=sessionToken})
+    if not source then return nil,err or "Falha ao baixar Hub" end
+    if status~=0 and status~=200 then return nil,"Servidor recusou o download (HTTP "..tostring(status)..")" end
+    if #source<100 then return nil,"Payload invalido: "..tostring(source) end
+    return source,nil
 end
 
 
-local function _0xBCCB(moduleName,sessionToken)
-    return _0x5F40("POST","/api/module-ticket",{
-        uid=_0x7E28,
-        version=_0x0AF8,
+local function requestModuleTicket(moduleName,sessionToken)
+    return requestJson("POST","/api/module-ticket",{
+        uid=UID,
+        version=VERSION,
         module=moduleName,
         sessionToken=sessionToken
     })
 end
 
-local function _0xD8C0(moduleName,ticket,sessionToken)
-    local _0xDB33,_0xA218,_0x55CF=_0xEB0D("POST",_0xD1F5.."/api/module",{
+local function downloadModule(moduleName,ticket,sessionToken)
+    local status,source,err=requestRaw("POST",API.."/api/module",{
         ticket=ticket,
-        uid=_0x7E28,
-        version=_0x0AF8,
+        uid=UID,
+        version=VERSION,
         module=moduleName,
         sessionToken=sessionToken
     })
-    if not _0xA218 then return nil,_0x55CF or "Falha ao baixar modulo" end
-    if _0xDB33~=0 and _0xDB33~=200 then
-        return nil,"Servidor recusou o modulo (HTTP "..tostring(_0xDB33).."): "..tostring(_0xA218)
+    if not source then return nil,err or "Falha ao baixar modulo" end
+    if status~=0 and status~=200 then
+        return nil,"Servidor recusou o modulo (HTTP "..tostring(status).."): "..tostring(source)
     end
-    if #_0xA218<20 then return nil,"Modulo invalido: "..tostring(_0xA218) end
-    return _0xA218,nil
+    if #source<20 then return nil,"Modulo invalido: "..tostring(source) end
+    return source,nil
 end
 
-local _0x2F47={}
-local _0xA5CB={}
+local LoadedModules={}
+local ModuleExports={}
 
-local function _0x3DD5(moduleName)
+local function secureLoadModule(moduleName)
     moduleName=string.lower(tostring(moduleName or "")):gsub("[^%w_-]","")
     if moduleName=="" then return nil,"Nome de modulo invalido" end
 
-    if _0x2F47[moduleName] then
-        return _0xA5CB[moduleName],nil
+    if LoadedModules[moduleName] then
+        return ModuleExports[moduleName],nil
     end
 
-    local _0x97DB=_0x0DE1.ARASAKA_BOOTSTRAP_CONTEXT
-    if type(_0x97DB)~="table" or type(_0x97DB.sessionToken)~="string" then
+    local context=ENV.ARASAKA_BOOTSTRAP_CONTEXT
+    if type(context)~="table" or type(context.sessionToken)~="string" then
         return nil,"Sessao ARASAKA indisponivel"
     end
 
-    local _0xB33C,_0xB051=_0xBCCB(moduleName,_0x97DB.sessionToken)
-    if not _0xB33C or _0xB33C.success~=true or type(_0xB33C.ticket)~="string" then
-        return nil,(_0xB33C and _0xB33C.message) or _0xB051 or "Falha ao emitir ticket do modulo"
+    local ticketResponse,ticketErr=requestModuleTicket(moduleName,context.sessionToken)
+    if not ticketResponse or ticketResponse.success~=true or type(ticketResponse.ticket)~="string" then
+        return nil,(ticketResponse and ticketResponse.message) or ticketErr or "Falha ao emitir ticket do modulo"
     end
 
-    local _0xA218,_0x7DD0=_0xD8C0(moduleName,_0xB33C.ticket,_0x97DB.sessionToken)
-    if not _0xA218 then return nil,_0x7DD0 end
+    local source,downloadErr=downloadModule(moduleName,ticketResponse.ticket,context.sessionToken)
+    if not source then return nil,downloadErr end
 
     if type(loadstring)~="function" then
         return nil,"Este ambiente nao possui loadstring"
     end
 
-    local _0x81E6,_0xAD1D=loadstring(_0xA218,"ARASAKA_MODULE_"..string.upper(moduleName))
-    _0xA218=nil
-    if not _0x81E6 then
-        return nil,"Falha ao compilar modulo "..moduleName..": "..tostring(_0xAD1D)
+    local chunk,compileErr=loadstring(source,"ARASAKA_MODULE_"..string.upper(moduleName))
+    source=nil
+    if not chunk then
+        return nil,"Falha ao compilar modulo "..moduleName..": "..tostring(compileErr)
     end
 
-    local _0x9605,_0x3CA9=pcall(_0x81E6)
-    _0x81E6=nil
-    if not _0x9605 then
-        return nil,"Erro ao iniciar modulo "..moduleName..": "..tostring(_0x3CA9)
+    local ok,exported=pcall(chunk)
+    chunk=nil
+    if not ok then
+        return nil,"Erro ao iniciar modulo "..moduleName..": "..tostring(exported)
     end
 
-    local _0x13C2=_0x0DE1.ARASAKA_SHARED
-    if type(_0x3CA9)=="function" then
-        local _0x877C,_0x8733=pcall(_0x3CA9,_0x13C2,_0x97DB)
-        if not _0x877C then
-            return nil,"Erro no Init do modulo "..moduleName..": "..tostring(_0x8733)
+    local shared=ENV.ARASAKA_SHARED
+    if type(exported)=="function" then
+        local initOk,initResult=pcall(exported,shared,context)
+        if not initOk then
+            return nil,"Erro no Init do modulo "..moduleName..": "..tostring(initResult)
         end
-        _0x3CA9=_0x8733
-    elseif type(_0x3CA9)=="table" and type(_0x3CA9.Init)=="function" then
-        local _0x877C,_0xE3CB=pcall(function()
-            _0x3CA9:Init(_0x13C2,_0x97DB)
+        exported=initResult
+    elseif type(exported)=="table" and type(exported.Init)=="function" then
+        local initOk,initErr=pcall(function()
+            exported:Init(shared,context)
         end)
-        if not _0x877C then
-            return nil,"Erro no Init do modulo "..moduleName..": "..tostring(_0xE3CB)
+        if not initOk then
+            return nil,"Erro no Init do modulo "..moduleName..": "..tostring(initErr)
         end
     end
 
-    _0x2F47[moduleName]=true
-    _0xA5CB[moduleName]=_0x3CA9
-    return _0x3CA9,nil
+    LoadedModules[moduleName]=true
+    ModuleExports[moduleName]=exported
+    return exported,nil
 end
 
-_0x0DE1.ARASAKA_MODULE_LOADER={
-    Load=_0x3DD5,
+ENV.ARASAKA_MODULE_LOADER={
+    Load=secureLoadModule,
     IsLoaded=function(moduleName)
         moduleName=string.lower(tostring(moduleName or ""))
-        return _0x2F47[moduleName]==true
+        return LoadedModules[moduleName]==true
     end,
     Get=function(moduleName)
         moduleName=string.lower(tostring(moduleName or ""))
-        return _0xA5CB[moduleName]
+        return ModuleExports[moduleName]
     end
 }
 
-local function _0xD978(_0xECEF)
-    local _0x0240=_0xECEF and _0xECEF.sessionToken
-    if type(_0x0240)~="string" or _0x0240=="" then return nil,"Servidor nao entregou sessionToken" end
-    local _0x97DB={
-        api=_0xD1F5,uid=_0x7E28,version=_0x0AF8,sessionToken=_0x0240,sessionExpiresAt=tonumber(_0xECEF.sessionExpiresAt),
-        licenseExpiresAt=tonumber(_0xECEF.expiresAt),isLifetime=_0xECEF.isLifetime==true,
-        heartbeatSeconds=tonumber(_0xECEF.heartbeatSeconds) or 60,offlineGraceSeconds=tonumber(_0xECEF.offlineGraceSeconds) or 600,
-        controlEpoch=tonumber(_0xECEF.controlEpoch),clientInstanceId=_0x1526,lastServerOkAt=os.time(),
-        deviceId=_0x0AE5.deviceId,platform=_0xA00D,companionRequired=false,companionUrl=nil
+local function createContext(response)
+    local token=response and response.sessionToken
+    if type(token)~="string" or token=="" then return nil,"Servidor nao entregou sessionToken" end
+    local context={
+        api=API,uid=UID,version=VERSION,sessionToken=token,sessionExpiresAt=tonumber(response.sessionExpiresAt),
+        licenseExpiresAt=tonumber(response.expiresAt),isLifetime=response.isLifetime==true,
+        heartbeatSeconds=tonumber(response.heartbeatSeconds) or 60,offlineGraceSeconds=tonumber(response.offlineGraceSeconds) or 600,
+        controlEpoch=tonumber(response.controlEpoch),clientInstanceId=CLIENT_INSTANCE_ID,lastServerOkAt=os.time(),
+        deviceId=Device.deviceId,platform=PLATFORM,companionRequired=false,companionUrl=nil
     }
-    _0x0DE1.ARASAKA_BOOTSTRAP_CONTEXT=_0x97DB
-    return _0x97DB
+    ENV.ARASAKA_BOOTSTRAP_CONTEXT=context
+    return context
 end
 
-local function _0x084D(authResponse,_0x7325)
-    local _0x97DB,_0x2596=_0xD978(authResponse);if not _0x97DB then return false,_0x2596 end
-    if _0x7325 then _0x7325("Solicitando ticket seguro...",Color3.fromRGB(255,210,80)) end
-    local _0xC397,_0xD001=_0x29A4(_0x97DB.sessionToken)
-    if not _0xC397 or _0xC397.success~=true or type(_0xC397.ticket)~="string" then return false,(_0xC397 and _0xC397.message) or _0xD001 or "Falha ao emitir ticket" end
-    if _0x7325 then _0x7325("Baixando build autorizada...",Color3.fromRGB(255,210,80)) end
-    local _0xA218,_0xD936=_0x4821(_0xC397.ticket,_0x97DB.sessionToken);if not _0xA218 then return false,_0xD936 end
+local function runPayload(authResponse,setStatus)
+    local context,contextErr=createContext(authResponse);if not context then return false,contextErr end
+    if setStatus then setStatus("Solicitando ticket seguro...",Color3.fromRGB(255,210,80)) end
+    local tr,te=requestScriptTicket(context.sessionToken)
+    if not tr or tr.success~=true or type(tr.ticket)~="string" then return false,(tr and tr.message) or te or "Falha ao emitir ticket" end
+    if setStatus then setStatus("Baixando build autorizada...",Color3.fromRGB(255,210,80)) end
+    local source,se=downloadScript(tr.ticket,context.sessionToken);if not source then return false,se end
     if type(loadstring)~="function" then return false,"Este ambiente nao possui loadstring." end
-    local _0x81E6,_0xC564=loadstring(_0xA218,"ARASAKA_PAYLOAD");_0xA218=nil
-    if not _0x81E6 then return false,"Falha ao compilar payload: "..tostring(_0xC564) end
-    if _0x7325 then _0x7325("ARASAKA autorizado. Iniciando...",Color3.fromRGB(80,255,120)) end
+    local chunk,ce=loadstring(source,"ARASAKA_PAYLOAD");source=nil
+    if not chunk then return false,"Falha ao compilar payload: "..tostring(ce) end
+    if setStatus then setStatus("ARASAKA autorizado. Iniciando...",Color3.fromRGB(80,255,120)) end
     task.wait(0.25)
-    local _0x9605,_0x2B84=pcall(_0x81E6);_0x81E6=nil
-    if not _0x9605 then _0x0DE1.ARASAKA_BOOTSTRAP_CONTEXT=nil;return false,"Erro ao iniciar Hub: "..tostring(_0x2B84) end
+    local ok,re=pcall(chunk);chunk=nil
+    if not ok then ENV.ARASAKA_BOOTSTRAP_CONTEXT=nil;return false,"Erro ao iniciar Hub: "..tostring(re) end
     return true
 end
 
 -- UI
-local _0xF696=_0xB041:FindFirstChild("ArasakaSecureLoader");if _0xF696 then _0xF696:Destroy() end
-local _0x5D82=Instance.new("ScreenGui");_0x5D82.Name="ArasakaSecureLoader";_0x5D82.ResetOnSpawn=false;_0x5D82.IgnoreGuiInset=true;_0x5D82.DisplayOrder=1000000;_0x5D82.Parent=_0xB041
-local _0x2E51=Instance.new("Frame");_0x2E51.Size=UDim2.fromScale(1,1);_0x2E51.BackgroundColor3=Color3.fromRGB(2,2,3);_0x2E51.BackgroundTransparency=0.06;_0x2E51.BorderSizePixel=0;_0x2E51.Parent=_0x5D82
-local _0x14D4=Instance.new("Frame");_0x14D4.AnchorPoint=Vector2.new(.5,.5);_0x14D4.Position=UDim2.fromScale(.5,.5);_0x14D4.Size=UDim2.new(0,420,0,280);_0x14D4.BackgroundColor3=Color3.fromRGB(10,10,13);_0x14D4.BorderSizePixel=0;_0x14D4.Parent=_0x2E51;Instance.new("UICorner",_0x14D4).CornerRadius=UDim.new(0,7)
-local _0xBBA1=Instance.new("UIStroke",_0x14D4);_0xBBA1.Color=Color3.fromRGB(190,25,25);_0xBBA1.Thickness=1.5
-local _0x18BC=Instance.new("Frame");_0x18BC.Size=UDim2.new(0,4,1,0);_0x18BC.BackgroundColor3=Color3.fromRGB(210,35,35);_0x18BC.BorderSizePixel=0;_0x18BC.Parent=_0x14D4
-local _0x110C=Instance.new("TextLabel");_0x110C.BackgroundTransparency=1;_0x110C.Position=UDim2.new(0,20,0,18);_0x110C.Size=UDim2.new(1,-40,0,28);_0x110C.Font=Enum.Font.GothamBold;_0x110C.Text="ARASAKA // SECURE ACCESS";_0x110C.TextSize=16;_0x110C.TextColor3=Color3.fromRGB(245,245,245);_0x110C.TextXAlignment=Enum.TextXAlignment.Left;_0x110C.Parent=_0x14D4
-local _0x24D0=Instance.new("TextLabel");_0x24D0.BackgroundTransparency=1;_0x24D0.Position=UDim2.new(0,20,0,47);_0x24D0.Size=UDim2.new(1,-40,0,20);_0x24D0.Font=Enum.Font.Code;_0x24D0.Text="UID "..UID.." // "..string.upper(_0xA00D);_0x24D0.TextSize=10;_0x24D0.TextColor3=Color3.fromRGB(115,115,120);_0x24D0.TextXAlignment=Enum.TextXAlignment.Left;_0x24D0.Parent=_0x14D4
-local _0xC911=Instance.new("TextLabel");_0xC911.BackgroundTransparency=1;_0xC911.Position=UDim2.new(0,20,0,76);_0xC911.Size=UDim2.new(1,-40,0,48);_0xC911.Font=Enum.Font.Gotham;_0xC911.Text="Validando licenca...";_0xC911.TextSize=13;_0xC911.TextWrapped=true;_0xC911.TextColor3=Color3.fromRGB(190,190,195);_0xC911.TextXAlignment=Enum.TextXAlignment.Left;_0xC911.Parent=_0x14D4
-local _0x3335=Instance.new("TextBox");_0x3335.Position=UDim2.new(0,20,0,134);_0x3335.Size=UDim2.new(1,-40,0,42);_0x3335.BackgroundColor3=Color3.fromRGB(20,20,25);_0x3335.BorderSizePixel=0;_0x3335.ClearTextOnFocus=false;_0x3335.PlaceholderText="UID liberado pelo Admin ou digite sua key";_0x3335.Text="";_0x3335.TextColor3=Color3.fromRGB(245,245,245);_0x3335.PlaceholderColor3=Color3.fromRGB(95,95,100);_0x3335.Font=Enum.Font.Gotham;_0x3335.TextSize=13;_0x3335.Parent=_0x14D4;Instance.new("UICorner",_0x3335).CornerRadius=UDim.new(0,5)
-local _0x8605=Instance.new("TextButton");_0x8605.Position=UDim2.new(0,20,0,188);_0x8605.Size=UDim2.new(1,-40,0,40);_0x8605.BackgroundColor3=Color3.fromRGB(150,20,25);_0x8605.BorderSizePixel=0;_0x8605.Text="VALIDAR / ATIVAR";_0x8605.TextColor3=Color3.fromRGB(255,255,255);_0x8605.Font=Enum.Font.GothamBold;_0x8605.TextSize=12;_0x8605.Parent=_0x14D4;Instance.new("UICorner",_0x8605).CornerRadius=UDim.new(0,5)
-local _0xF3E2=Instance.new("TextLabel");_0xF3E2.BackgroundTransparency=1;_0xF3E2.Position=UDim2.new(0,20,0,238);_0xF3E2.Size=UDim2.new(1,-40,0,24);_0xF3E2.Font=Enum.Font.Code;_0xF3E2.Text="Acesso por UID liberado no Admin OU por key // multi-conta liberado";_0xF3E2.TextSize=9;_0xF3E2.TextColor3=Color3.fromRGB(95,95,100);_0xF3E2.TextXAlignment=Enum.TextXAlignment.Left;_0xF3E2.Parent=_0x14D4
-local function _0x7325(t,c) _0xC911.Text=tostring(t or "");if c then _0xC911.TextColor3=c end end
-local _0x1604=false
-local function _0x4F4B(v) _0x1604=v==true;_0x8605.Active=not _0x1604;_0x8605.AutoButtonColor=not _0x1604;_0x8605.Text=_0x1604 and "PROCESSANDO..." or "VALIDAR / ATIVAR" end
-local function _0x6D9E() _0x8F76:Create(_0x14D4,TweenInfo.new(.18),{BackgroundTransparency=1}):Play();task.wait(.2);if _0x5D82 then _0x5D82:Destroy() end end
+local old=PlayerGui:FindFirstChild("ArasakaSecureLoader");if old then old:Destroy() end
+local Gui=Instance.new("ScreenGui");Gui.Name="ArasakaSecureLoader";Gui.ResetOnSpawn=false;Gui.IgnoreGuiInset=true;Gui.DisplayOrder=1000000;Gui.Parent=PlayerGui
+local Overlay=Instance.new("Frame");Overlay.Size=UDim2.fromScale(1,1);Overlay.BackgroundColor3=Color3.fromRGB(2,2,3);Overlay.BackgroundTransparency=0.06;Overlay.BorderSizePixel=0;Overlay.Parent=Gui
+local Card=Instance.new("Frame");Card.AnchorPoint=Vector2.new(.5,.5);Card.Position=UDim2.fromScale(.5,.5);Card.Size=UDim2.new(0,420,0,280);Card.BackgroundColor3=Color3.fromRGB(10,10,13);Card.BorderSizePixel=0;Card.Parent=Overlay;Instance.new("UICorner",Card).CornerRadius=UDim.new(0,7)
+local Stroke=Instance.new("UIStroke",Card);Stroke.Color=Color3.fromRGB(190,25,25);Stroke.Thickness=1.5
+local Accent=Instance.new("Frame");Accent.Size=UDim2.new(0,4,1,0);Accent.BackgroundColor3=Color3.fromRGB(210,35,35);Accent.BorderSizePixel=0;Accent.Parent=Card
+local Title=Instance.new("TextLabel");Title.BackgroundTransparency=1;Title.Position=UDim2.new(0,20,0,18);Title.Size=UDim2.new(1,-40,0,28);Title.Font=Enum.Font.GothamBold;Title.Text="ARASAKA // SECURE ACCESS";Title.TextSize=16;Title.TextColor3=Color3.fromRGB(245,245,245);Title.TextXAlignment=Enum.TextXAlignment.Left;Title.Parent=Card
+local Sub=Instance.new("TextLabel");Sub.BackgroundTransparency=1;Sub.Position=UDim2.new(0,20,0,47);Sub.Size=UDim2.new(1,-40,0,20);Sub.Font=Enum.Font.Code;Sub.Text="UID "..UID.." // "..string.upper(PLATFORM);Sub.TextSize=10;Sub.TextColor3=Color3.fromRGB(115,115,120);Sub.TextXAlignment=Enum.TextXAlignment.Left;Sub.Parent=Card
+local Status=Instance.new("TextLabel");Status.BackgroundTransparency=1;Status.Position=UDim2.new(0,20,0,76);Status.Size=UDim2.new(1,-40,0,48);Status.Font=Enum.Font.Gotham;Status.Text="Validando licenca...";Status.TextSize=13;Status.TextWrapped=true;Status.TextColor3=Color3.fromRGB(190,190,195);Status.TextXAlignment=Enum.TextXAlignment.Left;Status.Parent=Card
+local Input=Instance.new("TextBox");Input.Position=UDim2.new(0,20,0,134);Input.Size=UDim2.new(1,-40,0,42);Input.BackgroundColor3=Color3.fromRGB(20,20,25);Input.BorderSizePixel=0;Input.ClearTextOnFocus=false;Input.PlaceholderText="UID liberado pelo Admin ou digite sua key";Input.Text="";Input.TextColor3=Color3.fromRGB(245,245,245);Input.PlaceholderColor3=Color3.fromRGB(95,95,100);Input.Font=Enum.Font.Gotham;Input.TextSize=13;Input.Parent=Card;Instance.new("UICorner",Input).CornerRadius=UDim.new(0,5)
+local Button=Instance.new("TextButton");Button.Position=UDim2.new(0,20,0,188);Button.Size=UDim2.new(1,-40,0,40);Button.BackgroundColor3=Color3.fromRGB(150,20,25);Button.BorderSizePixel=0;Button.Text="VALIDAR / ATIVAR";Button.TextColor3=Color3.fromRGB(255,255,255);Button.Font=Enum.Font.GothamBold;Button.TextSize=12;Button.Parent=Card;Instance.new("UICorner",Button).CornerRadius=UDim.new(0,5)
+local Hint=Instance.new("TextLabel");Hint.BackgroundTransparency=1;Hint.Position=UDim2.new(0,20,0,238);Hint.Size=UDim2.new(1,-40,0,24);Hint.Font=Enum.Font.Code;Hint.Text="Acesso por UID liberado no Admin OU por key // multi-conta liberado";Hint.TextSize=9;Hint.TextColor3=Color3.fromRGB(95,95,100);Hint.TextXAlignment=Enum.TextXAlignment.Left;Hint.Parent=Card
+local function setStatus(t,c) Status.Text=tostring(t or "");if c then Status.TextColor3=c end end
+local busy=false
+local function setBusy(v) busy=v==true;Button.Active=not busy;Button.AutoButtonColor=not busy;Button.Text=busy and "PROCESSANDO..." or "VALIDAR / ATIVAR" end
+local function finishSuccess() TweenService:Create(Card,TweenInfo.new(.18),{BackgroundTransparency=1}):Play();task.wait(.2);if Gui then Gui:Destroy() end end
 
-local function _0x2856(inputText)
-    if _0x1604 then return end
-    _0x4F4B(true)
+local function authAndRun(inputText)
+    if busy then return end
+    setBusy(true)
 
-    _0x7325("Validando UID...",Color3.fromRGB(255,210,80))
-    local _0xECEF,_0x55CF=_0x82C5()
+    setStatus("Validando UID...",Color3.fromRGB(255,210,80))
+    local response,err=bootstrap()
 
-    if _0xECEF and _0xECEF.authorized==true then
+    if response and response.authorized==true then
         -- O Secure Access não pode ficar por cima da loading screen do ARASAKA.
         -- Esconde antes de executar o payload e só volta se houver erro.
-        if _0x5D82 then _0x5D82.Enabled=false end
-        local _0xCB8A,_0xD614=_0x084D(_0xECEF,_0x7325)
-        if not _0xCB8A then
-            if _0x5D82 then _0x5D82.Enabled=true end
-            _0x7325(_0xD614 or "Falha ao iniciar Hub.",Color3.fromRGB(255,95,95))
-            _0x4F4B(false)
+        if Gui then Gui.Enabled=false end
+        local okRun,runErr=runPayload(response,setStatus)
+        if not okRun then
+            if Gui then Gui.Enabled=true end
+            setStatus(runErr or "Falha ao iniciar Hub.",Color3.fromRGB(255,95,95))
+            setBusy(false)
             return
         end
-        if _0x5D82 then _0x5D82:Destroy() end
+        if Gui then Gui:Destroy() end
         return
     end
 
     if inputText and inputText~="" then
-        _0x7325("Ativando key para este UID...",Color3.fromRGB(255,210,80))
-        local _0x3F68,_0x16EA=_0x2A22(inputText)
-        if not _0x3F68 then
-            _0x7325(_0x16EA or "Falha ao ativar key.",Color3.fromRGB(255,95,95))
-            _0x4F4B(false)
+        setStatus("Ativando key para este UID...",Color3.fromRGB(255,210,80))
+        local redeem,redeemErr=redeemKey(inputText)
+        if not redeem then
+            setStatus(redeemErr or "Falha ao ativar key.",Color3.fromRGB(255,95,95))
+            setBusy(false)
             return
         end
-        if _0x3F68.success~=true then
-            _0x7325(_0x3F68.message or "Key recusada.",Color3.fromRGB(255,95,95))
-            _0x4F4B(false)
+        if redeem.success~=true then
+            setStatus(redeem.message or "Key recusada.",Color3.fromRGB(255,95,95))
+            setBusy(false)
             return
         end
 
-        _0x7325("Licenca ativada. Criando sessao...",Color3.fromRGB(255,210,80))
-        _0xECEF,_0x55CF=_0x82C5()
-        if _0xECEF and _0xECEF.authorized==true then
+        setStatus("Licenca ativada. Criando sessao...",Color3.fromRGB(255,210,80))
+        response,err=bootstrap()
+        if response and response.authorized==true then
             -- Mesmo comportamento após resgatar key: a loading screen fica limpa.
-            if _0x5D82 then _0x5D82.Enabled=false end
-            local _0xCB8A,_0xD614=_0x084D(_0xECEF,_0x7325)
-            if not _0xCB8A then
-                if _0x5D82 then _0x5D82.Enabled=true end
-                _0x7325(_0xD614 or "Falha ao iniciar Hub.",Color3.fromRGB(255,95,95))
-                _0x4F4B(false)
+            if Gui then Gui.Enabled=false end
+            local okRun,runErr=runPayload(response,setStatus)
+            if not okRun then
+                if Gui then Gui.Enabled=true end
+                setStatus(runErr or "Falha ao iniciar Hub.",Color3.fromRGB(255,95,95))
+                setBusy(false)
                 return
             end
-            if _0x5D82 then _0x5D82:Destroy() end
+            if Gui then Gui:Destroy() end
             return
         end
     end
 
-    if not _0xECEF then
-        _0x7325(_0x55CF or "Servidor temporariamente indisponivel.",Color3.fromRGB(255,95,95))
+    if not response then
+        setStatus(err or "Servidor temporariamente indisponivel.",Color3.fromRGB(255,95,95))
     else
-        _0x7325(_0xECEF.message or "UID sem acesso. Libere o UID no Admin ou digite uma key.",Color3.fromRGB(255,170,70))
+        setStatus(response.message or "UID sem acesso. Libere o UID no Admin ou digite uma key.",Color3.fromRGB(255,170,70))
     end
-    _0x4F4B(false)
+    setBusy(false)
 end
 
-_0x8605.MouseButton1Click:Connect(function() _0x2856(_0x3335.Text) end)
-task.spawn(function() task.wait(.2); _0x2856(nil) end)
+Button.MouseButton1Click:Connect(function() authAndRun(Input.Text) end)
+task.spawn(function() task.wait(.2); authAndRun(nil) end)
