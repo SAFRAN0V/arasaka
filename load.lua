@@ -330,7 +330,7 @@ end
 local old=PlayerGui:FindFirstChild("ArasakaSecureLoader");if old then old:Destroy() end
 local Gui=Instance.new("ScreenGui");Gui.Name="ArasakaSecureLoader";Gui.ResetOnSpawn=false;Gui.IgnoreGuiInset=true;Gui.DisplayOrder=1000000;Gui.Parent=PlayerGui
 local Overlay=Instance.new("Frame");Overlay.Size=UDim2.fromScale(1,1);Overlay.BackgroundColor3=Color3.fromRGB(2,2,3);Overlay.BackgroundTransparency=0.06;Overlay.BorderSizePixel=0;Overlay.Parent=Gui
-local Card=Instance.new("Frame");Card.AnchorPoint=Vector2.new(.5,.5);Card.Position=UDim2.fromScale(.5,.5);Card.Size=UDim2.new(0,420,0,280);Card.BackgroundColor3=Color3.fromRGB(10,10,13);Card.BorderSizePixel=0;Card.Parent=Overlay;Instance.new("UICorner",Card).CornerRadius=UDim.new(0,7)
+local Card=Instance.new("Frame");Card.AnchorPoint=Vector2.new(0.5,0.5);Card.Position=UDim2.fromScale(0.5,0.5);Card.Size=UDim2.new(0,420,0,280);Card.BackgroundColor3=Color3.fromRGB(10,10,13);Card.BorderSizePixel=0;Card.Parent=Overlay;Instance.new("UICorner",Card).CornerRadius=UDim.new(0,7)
 local Stroke=Instance.new("UIStroke",Card);Stroke.Color=Color3.fromRGB(190,25,25);Stroke.Thickness=1.5
 local Accent=Instance.new("Frame");Accent.Size=UDim2.new(0,4,1,0);Accent.BackgroundColor3=Color3.fromRGB(210,35,35);Accent.BorderSizePixel=0;Accent.Parent=Card
 local Title=Instance.new("TextLabel");Title.BackgroundTransparency=1;Title.Position=UDim2.new(0,20,0,18);Title.Size=UDim2.new(1,-40,0,28);Title.Font=Enum.Font.GothamBold;Title.Text="ARASAKA // SECURE ACCESS";Title.TextSize=16;Title.TextColor3=Color3.fromRGB(245,245,245);Title.TextXAlignment=Enum.TextXAlignment.Left;Title.Parent=Card
@@ -342,7 +342,7 @@ local Hint=Instance.new("TextLabel");Hint.BackgroundTransparency=1;Hint.Position
 local function setStatus(t,c) Status.Text=tostring(t or "");if c then Status.TextColor3=c end end
 local busy=false
 local function setBusy(v) busy=v==true;Button.Active=not busy;Button.AutoButtonColor=not busy;Button.Text=busy and "PROCESSANDO..." or "VALIDAR / ATIVAR" end
-local function finishSuccess() TweenService:Create(Card,TweenInfo.new(.18),{BackgroundTransparency=1}):Play();task.wait(.2);if Gui then Gui:Destroy() end end
+local function finishSuccess() TweenService:Create(Card,TweenInfo.new(0.18),{BackgroundTransparency=1}):Play();task.wait(0.2);if Gui then Gui:Destroy() end end
 
 local function authAndRun(inputText)
     if busy then return end
@@ -406,4 +406,4 @@ local function authAndRun(inputText)
 end
 
 Button.MouseButton1Click:Connect(function() authAndRun(Input.Text) end)
-task.spawn(function() task.wait(.2); authAndRun(nil) end)
+task.spawn(function() task.wait(0.2); authAndRun(nil) end)
