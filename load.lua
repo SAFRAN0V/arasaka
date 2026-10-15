@@ -1,3 +1,5 @@
+-- ARASAKA V8 | Diagnostico de login | Build empacotada
+-- Compativel com executores que disponibilizam loadstring.
 local __parts = {
     'LS0gQVJBU0FLQSBTRUNVUklUWSBWOCAtIERJQUdOT1NUSUNPIERFIExPR0lOIChzZW0gZmVjaGFyIGEgVUkpLgotLSBDb2xvcXVlIG5vIGV4ZWN1dG9yLiBPIHByaW1laXJvIGxvZ2luIGV4aWdlIGEgbWVzbWEg',
     'a2V5IHF1ZSBzZXJhIHVzYWRhIGVtIG91dHJvcyBhcGFyZWxob3MuCi0tIEFURU5DQU86IGNvbmZpZ3VyZSBBUEkvVkVSU0lPTiBwYXJhIGNvcnJlc3BvbmRlciBhIHByb2R1Y2FvLgpsb2NhbCBQbGF5ZXJzPWdh',
