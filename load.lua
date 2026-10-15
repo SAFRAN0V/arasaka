@@ -1,76 +1,123 @@
--- ARASAKA V8 | Diagnostico de login | Build empacotada
--- Compativel com executores que disponibilizam loadstring.
-local __parts = {
-    'LS0gQVJBU0FLQSBTRUNVUklUWSBWOCAtIERJQUdOT1NUSUNPIERFIExPR0lOIChzZW0gZmVjaGFyIGEgVUkpLgotLSBDb2xvcXVlIG5vIGV4ZWN1dG9yLiBPIHByaW1laXJvIGxvZ2luIGV4aWdlIGEgbWVzbWEg',
-    'a2V5IHF1ZSBzZXJhIHVzYWRhIGVtIG91dHJvcyBhcGFyZWxob3MuCi0tIEFURU5DQU86IGNvbmZpZ3VyZSBBUEkvVkVSU0lPTiBwYXJhIGNvcnJlc3BvbmRlciBhIHByb2R1Y2FvLgpsb2NhbCBQbGF5ZXJzPWdh',
-    'bWU6R2V0U2VydmljZSgnUGxheWVycycpCmxvY2FsIEhTPWdhbWU6R2V0U2VydmljZSgnSHR0cFNlcnZpY2UnKQpsb2NhbCBBUEk9J2h0dHBzOi8vY2hhdHByaXZhZG8tY3d1My5vbnJlbmRlci5jb20nCmxvY2Fs',
-    'IFZFUlNJT049JzYuMC4wJwpsb2NhbCBGSUxFPSdBUkFTQUtBL3Nlc3Npb25fdjguanNvbicKbG9jYWwgUEc9UGxheWVycy5Mb2NhbFBsYXllcjpXYWl0Rm9yQ2hpbGQoJ1BsYXllckd1aScpCmxvY2FsIGZ1bmN0',
-    'aW9uIHJlcShwYXRoLGJvZHkpCiAgICBsb2NhbCBmbj1yZXF1ZXN0IG9yIGh0dHBfcmVxdWVzdCBvciAoc3luIGFuZCBzeW4ucmVxdWVzdCkgb3IgKGh0dHAgYW5kIGh0dHAucmVxdWVzdCkKICAgIGlmIHR5cGUo',
-    'Zm4pfj0nZnVuY3Rpb24nIHRoZW4gcmV0dXJuIG5pbCwnRXhlY3V0b3Igc2VtIGZ1bmNhbyByZXF1ZXN0JyBlbmQKICAgIGxvY2FsIG9rLHI9cGNhbGwoZm4se1VybD1BUEkuLnBhdGgsTWV0aG9kPSdQT1NUJyxI',
-    'ZWFkZXJzPXtbJ0NvbnRlbnQtVHlwZSddPSdhcHBsaWNhdGlvbi9qc29uJ30sQm9keT1IUzpKU09ORW5jb2RlKGJvZHkpfSkKICAgIGlmIG5vdCBvayBvciB0eXBlKHIpfj0ndGFibGUnIHRoZW4gcmV0dXJuIG5p',
-    'bCwnRmFsaGEgZGUgY29uZXhhbycgZW5kCiAgICBsb2NhbCBjb2RlPXRvbnVtYmVyKHIuU3RhdHVzQ29kZSBvciByLlN0YXR1cyBvciByLnN0YXR1c19jb2RlKSBvciAwCiAgICBsb2NhbCByYXc9dG9zdHJpbmco',
-    'ci5Cb2R5IG9yIHIuYm9keSBvciAnJykKICAgIHJldHVybiB7Y29kZT1jb2RlLGJvZHk9cmF3fQplbmQKbG9jYWwgZnVuY3Rpb24ganNvbihwYXRoLGJvZHkpCiAgICBsb2NhbCByLGU9cmVxKHBhdGgsYm9keSkK',
-    'ICAgIGlmIG5vdCByIHRoZW4gcmV0dXJuIG5pbCxlIGVuZAogICAgbG9jYWwgb2ssdj1wY2FsbChIUy5KU09ORGVjb2RlLEhTLHIuYm9keSkKICAgIGlmIG5vdCBvayBvciB0eXBlKHYpfj0ndGFibGUnIHRoZW4g',
-    'cmV0dXJuIG5pbCwnUmVzcG9zdGEgaW52YWxpZGE6ICcuLnRvc3RyaW5nKHIuY29kZSkgZW5kCiAgICByZXR1cm4gdiwgKHIuY29kZT09MjAwIGFuZCBuaWwgb3IgdG9zdHJpbmcodi5zdGF0dXMgb3IgJ0hUVFAg',
-    'Jy4uci5jb2RlKSkKZW5kCmxvY2FsIGZ1bmN0aW9uIHNhdmUodG9rZW4pCiAgICBpZiB0eXBlKHdyaXRlZmlsZSl+PSdmdW5jdGlvbicgdGhlbiByZXR1cm4gZmFsc2UgZW5kCiAgICBpZiB0eXBlKG1ha2Vmb2xk',
-    'ZXIpPT0nZnVuY3Rpb24nIHRoZW4gcGNhbGwobWFrZWZvbGRlciwnQVJBU0FLQScpIGVuZAogICAgcmV0dXJuIHBjYWxsKHdyaXRlZmlsZSxGSUxFLEhTOkpTT05FbmNvZGUoe3Nlc3Npb25Ub2tlbj10b2tlbn0p',
-    'KQplbmQKbG9jYWwgZnVuY3Rpb24gY2xlYXIoKQogICAgaWYgdHlwZShkZWxmaWxlKT09J2Z1bmN0aW9uJyB0aGVuIHBjYWxsKGRlbGZpbGUsRklMRSkKICAgIGVsc2VpZiB0eXBlKHdyaXRlZmlsZSk9PSdmdW5j',
-    'dGlvbicgdGhlbiBwY2FsbCh3cml0ZWZpbGUsRklMRSwne30nKSBlbmQKZW5kCmxvY2FsIGZ1bmN0aW9uIHN0b3JlZCgpCiAgICBpZiB0eXBlKHJlYWRmaWxlKX49J2Z1bmN0aW9uJyB0aGVuIHJldHVybiBuaWwg',
-    'ZW5kCiAgICBsb2NhbCBvayx2PXBjYWxsKHJlYWRmaWxlLEZJTEUpCiAgICBpZiBub3Qgb2sgdGhlbiByZXR1cm4gbmlsIGVuZAogICAgbG9jYWwgdmFsaWQsZGF0YT1wY2FsbChIUy5KU09ORGVjb2RlLEhTLHYp',
-    'CiAgICBpZiB2YWxpZCBhbmQgdHlwZShkYXRhKT09J3RhYmxlJyBhbmQgdHlwZShkYXRhLnNlc3Npb25Ub2tlbik9PSdzdHJpbmcnIHRoZW4gcmV0dXJuIGRhdGEuc2Vzc2lvblRva2VuIGVuZAplbmQKbG9jYWwg',
-    'ZnVuY3Rpb24gbGF1bmNoKHRva2VuKQogICAgbG9jYWwgc3RhdHVzLGVycj1qc29uKCcvYXBpL3Y4L3N0YXR1cycse3Nlc3Npb25Ub2tlbj10b2tlbn0pCiAgICBpZiBub3Qgc3RhdHVzIG9yIG5vdCBzdGF0dXMu',
-    'c3VjY2VzcyB0aGVuIHJldHVybiBmYWxzZSxlcnIgb3IgJ0xpY2VuY2EgaW52YWxpZGEgb3UgZXhwaXJhZGEnIGVuZAogICAgbG9jYWwgcmVzdWx0LGU9cmVxKCcvYXBpL3Y4L3NjcmlwdCcse3Nlc3Npb25Ub2tl',
-    'bj10b2tlbix2ZXJzaW9uPVZFUlNJT059KQogICAgaWYgbm90IHJlc3VsdCB0aGVuIHJldHVybiBmYWxzZSxlIGVuZAogICAgaWYgcmVzdWx0LmNvZGV+PTIwMCB0aGVuIHJldHVybiBmYWxzZSwnU2NyaXB0IG5h',
-    'byBkaXNwb25pdmVsIChIVFRQICcuLnRvc3RyaW5nKHJlc3VsdC5jb2RlKS4uJyk6ICcuLnJlc3VsdC5ib2R5OnN1YigxLDEyMCkgZW5kCiAgICBsb2NhbCBjb21waWxlcj1sb2Fkc3RyaW5nCiAgICBpZiB0eXBl',
-    'KGNvbXBpbGVyKX49J2Z1bmN0aW9uJyB0aGVuIHJldHVybiBmYWxzZSwnRXhlY3V0b3IgbmFvIG9mZXJlY2UgbG9hZHN0cmluZycgZW5kCiAgICBsb2NhbCBjaHVuayxjb21wRXJyPWNvbXBpbGVyKHJlc3VsdC5i',
-    'b2R5KQogICAgaWYgbm90IGNodW5rIHRoZW4gcmV0dXJuIGZhbHNlLCdGYWxoYSBhbyBjb21waWxhciBodWI6ICcuLnRvc3RyaW5nKGNvbXBFcnIpIGVuZAogICAgbG9jYWwgZXhlY3V0ZWQsIGV4ZWN1dGlvbkVy',
-    'cm9yID0gcGNhbGwoY2h1bmspCiAgICBpZiBub3QgZXhlY3V0ZWQgdGhlbgogICAgICAgIHJldHVybiBmYWxzZSwgJ0Vycm8gbm8gSHViOiAnIC4uIHRvc3RyaW5nKGV4ZWN1dGlvbkVycm9yKQogICAgZW5kCiAg',
-    'ICByZXR1cm4gdHJ1ZQplbmQKbG9jYWwgZ3VpPUluc3RhbmNlLm5ldygnU2NyZWVuR3VpJykKZ3VpLk5hbWU9J0FyYXNha2FTZWN1cml0eVY4JztndWkuUmVzZXRPblNwYXduPWZhbHNlCnBjYWxsKGZ1bmN0aW9u',
-    'KCkgZ3VpLlBhcmVudD1nZXRodWkoKSBlbmQpCmlmIG5vdCBndWkuUGFyZW50IHRoZW4gZ3VpLlBhcmVudD1QRyBlbmQKbG9jYWwgZnJhbWU9SW5zdGFuY2UubmV3KCdGcmFtZScsZ3VpKQpmcmFtZS5TaXplPVVE',
-    'aW0yLmZyb21PZmZzZXQoMzgwLDI0OCk7ZnJhbWUuUG9zaXRpb249VURpbTIubmV3KC41LC0xOTAsLjUsLTEyNCkKZnJhbWUuQmFja2dyb3VuZENvbG9yMz1Db2xvcjMuZnJvbVJHQigxNywxNywyMik7ZnJhbWUu',
-    'Qm9yZGVyU2l6ZVBpeGVsPTAKSW5zdGFuY2UubmV3KCdVSUNvcm5lcicsZnJhbWUpLkNvcm5lclJhZGl1cz1VRGltLm5ldygwLDEyKQpsb2NhbCB0aXRsZT1JbnN0YW5jZS5uZXcoJ1RleHRMYWJlbCcsZnJhbWUp',
-    'CnRpdGxlLlNpemU9VURpbTIubmV3KDEsLTIwLDAsNDgpO3RpdGxlLlBvc2l0aW9uPVVEaW0yLmZyb21PZmZzZXQoMTAsMTApCnRpdGxlLlRleHQ9J0FSQVNBS0EgIHwgIExPR0lOIFY4Jzt0aXRsZS5Gb250PUVu',
-    'dW0uRm9udC5Hb3RoYW1Cb2xkO3RpdGxlLlRleHRTaXplPTE5CnRpdGxlLlRleHRDb2xvcjM9Q29sb3IzLmZyb21SR0IoMjI1LDYwLDY1KTt0aXRsZS5CYWNrZ3JvdW5kVHJhbnNwYXJlbmN5PTEKbG9jYWwgZW50',
-    'cnk9SW5zdGFuY2UubmV3KCdUZXh0Qm94JyxmcmFtZSkKZW50cnkuU2l6ZT1VRGltMi5uZXcoMSwtMzIsMCw0Mik7ZW50cnkuUG9zaXRpb249VURpbTIuZnJvbU9mZnNldCgxNiw2OCkKZW50cnkuUGxhY2Vob2xk',
-    'ZXJUZXh0PSdDb2xlIHN1YSBrZXkgQXJhc2FrYSc7ZW50cnkuVGV4dD0nJztlbnRyeS5DbGVhclRleHRPbkZvY3VzPWZhbHNlCmVudHJ5LkJhY2tncm91bmRDb2xvcjM9Q29sb3IzLmZyb21SR0IoMzUsMzUsNDIp',
-    'O2VudHJ5LlRleHRDb2xvcjM9Q29sb3IzLm5ldygxLDEsMSkKZW50cnkuUGxhY2Vob2xkZXJDb2xvcjM9Q29sb3IzLmZyb21SR0IoMTY1LDE2NSwxNzApO2VudHJ5LkZvbnQ9RW51bS5Gb250LkdvdGhhbTtlbnRy',
-    'eS5UZXh0U2l6ZT0xMwpJbnN0YW5jZS5uZXcoJ1VJQ29ybmVyJyxlbnRyeSkuQ29ybmVyUmFkaXVzPVVEaW0ubmV3KDAsOCkKbG9jYWwgYnRuPUluc3RhbmNlLm5ldygnVGV4dEJ1dHRvbicsZnJhbWUpCmJ0bi5T',
-    'aXplPVVEaW0yLm5ldygxLC0zMiwwLDQwKTtidG4uUG9zaXRpb249VURpbTIuZnJvbU9mZnNldCgxNiwxMjApCmJ0bi5UZXh0PSdFTlRSQVInO2J0bi5Gb250PUVudW0uRm9udC5Hb3RoYW1Cb2xkO2J0bi5UZXh0',
-    'U2l6ZT0xNQpidG4uVGV4dENvbG9yMz1Db2xvcjMubmV3KDEsMSwxKTtidG4uQmFja2dyb3VuZENvbG9yMz1Db2xvcjMuZnJvbVJHQigxNDgsMzAsMzYpCkluc3RhbmNlLm5ldygnVUlDb3JuZXInLGJ0bikuQ29y',
-    'bmVyUmFkaXVzPVVEaW0ubmV3KDAsOCkKbG9jYWwgaW5mbz1JbnN0YW5jZS5uZXcoJ1RleHRMYWJlbCcsZnJhbWUpCmluZm8uU2l6ZT1VRGltMi5uZXcoMSwtMjQsMCw3OCk7aW5mby5Qb3NpdGlvbj1VRGltMi5m',
-    'cm9tT2Zmc2V0KDEyLDE2NikKaW5mby5UZXh0PSdMaWNlbmNhIHZhbGlkYSBlbSBQQywgY2VsdWxhciBlIGNvbnRhcyBkaWZlcmVudGVzLicKaW5mby5UZXh0V3JhcHBlZD10cnVlO2luZm8uVGV4dFlBbGlnbm1l',
-    'bnQ9RW51bS5UZXh0WUFsaWdubWVudC5Ub3A7aW5mby5UZXh0U2l6ZT0xMjtpbmZvLkZvbnQ9RW51bS5Gb250LkdvdGhhbQppbmZvLlRleHRDb2xvcjM9Q29sb3IzLmZyb21SR0IoMjEwLDIxMCwyMTUpO2luZm8u',
-    'QmFja2dyb3VuZFRyYW5zcGFyZW5jeT0xCmxvY2FsIGJ1c3k9ZmFsc2UKbG9jYWwgZnVuY3Rpb24gc2hvd0Vycm9yKG1lc3NhZ2UpCiAgIGxvY2FsIG1zZz10b3N0cmluZyhtZXNzYWdlIG9yICdFcnJvIGRlc2Nv',
-    'bmhlY2lkbycpCiAgIGluZm8uVGV4dD1tc2cKICAgd2FybignW0FSQVNBS0EgVjhdICcuLm1zZykKZW5kCmxvY2FsIGZ1bmN0aW9uIHN0YXJ0KHRva2VuKQogICBpbmZvLlRleHQ9J1ZhbGlkYW5kbyBsaWNlbsOn',
-    'YSBlIGNhcnJlZ2FuZG8gUHJlbWl1bS4uLicKICAgbG9jYWwgb2ssZXJyPWxhdW5jaCh0b2tlbikKICAgaWYgb2sgdGhlbgogICAgICAtLSBOw6NvIG9jdWx0YXIgYSBqYW5lbGEgYXV0b21hdGljYW1lbnRlIGF0',
-    'w6kgdGVzdGFyIGEgY29tcGF0aWJpbGlkYWRlIGRvIEh1Yi4KICAgICAgaW5mby5UZXh0PSdIdWIgZXhlY3V0YWRvLiBTZSBhIGludGVyZmFjZSBuYW8gYXBhcmVjZXIsIG8gUHJlbWl1bSBwb2RlIGV4aWdpciBh',
-    'dXRoIFY3LicKICAgICAgYnRuLlRleHQ9J1JFQ0FSUkVHQVInCiAgICAgIHJldHVybiB0cnVlCiAgIGVuZAogICBzaG93RXJyb3IoZXJyIG9yICdGYWxoYSBhbyBjYXJyZWdhciBQcmVtaXVtJykKICAgcmV0dXJu',
-    'IGZhbHNlCmVuZApidG4uTW91c2VCdXR0b24xQ2xpY2s6Q29ubmVjdChmdW5jdGlvbigpCiAgIGlmIGJ1c3kgdGhlbiByZXR1cm4gZW5kCiAgIGxvY2FsIGtleT1lbnRyeS5UZXh0OmdzdWIoJ14lcysnLCcnKTpn',
-    'c3ViKCclcyskJywnJykKICAgaWYgI2tleTw4IHRoZW4gaW5mby5UZXh0PSdEaWdpdGUgc3VhIGtleSc7cmV0dXJuIGVuZAogICBidXN5PXRydWU7YnRuLlRleHQ9J1ZFUklGSUNBTkRPLi4uJwogICBsb2NhbCBs',
-    'b2dpbixlPWpzb24oJy9hcGkvdjgvbG9naW4nLHtrZXk9a2V5fSkKICAgaWYgbG9naW4gYW5kIGxvZ2luLnN1Y2Nlc3MgYW5kIGxvZ2luLnNlc3Npb25Ub2tlbiB0aGVuCiAgICAgIGVudHJ5LlRleHQ9Jyc7c2F2',
-    'ZShsb2dpbi5zZXNzaW9uVG9rZW4pCiAgICAgIHN0YXJ0KGxvZ2luLnNlc3Npb25Ub2tlbikKICAgZWxzZSBzaG93RXJyb3IoJ0xvZ2luIHJlY3VzYWRvOiAnLi50b3N0cmluZyhlIG9yIChsb2dpbiBhbmQgbG9n',
-    'aW4uc3RhdHVzKSBvciAnZXJybyBkZSByZWRlJykpIGVuZAogICBidXN5PWZhbHNlO2lmIGJ0bi5UZXh0fj0nUkVDQVJSRUdBUicgdGhlbiBidG4uVGV4dD0nRU5UUkFSJyBlbmQKZW5kKQp0YXNrLnNwYXduKGZ1',
-    'bmN0aW9uKCkKIGxvY2FsIHRva2VuPXN0b3JlZCgpCiBpZiB0b2tlbiB0aGVuCiAgIGluZm8uVGV4dD0nVmVyaWZpY2FuZG8gbG9naW4gc2Fsdm8uLi4nCiAgIGxvY2FsIG9rPXN0YXJ0KHRva2VuKQogICBpZiBu',
-    'b3Qgb2sgdGhlbgogICAgICBsb2NhbCBzdGF0ZT1qc29uKCcvYXBpL3Y4L3N0YXR1cycse3Nlc3Npb25Ub2tlbj10b2tlbn0pCiAgICAgIGlmIHN0YXRlIGFuZCAoc3RhdGUuc3RhdHVzPT0nc2Vzc2lvbl9leHBp',
-    'cmVkJyBvciBzdGF0ZS5zdGF0dXM9PSdpbnZhbGlkX3Rva2VuJykgdGhlbiBjbGVhcigpIGVuZAogICBlbmQKIGVuZAplbmQpCg=='
-}
-local __b64 = table.concat(__parts)
-local __a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-local __map = {}
-for __i = 1, #__a do __map[string.sub(__a,__i,__i)] = __i-1 end
-local __out = {}
-for __i=1,#__b64,4 do
-  local __c1=__map[string.sub(__b64,__i,__i)] or 0
-  local __c2=__map[string.sub(__b64,__i+1,__i+1)] or 0
-  local __x3=string.sub(__b64,__i+2,__i+2)
-  local __x4=string.sub(__b64,__i+3,__i+3)
-  local __c3=__map[__x3] or 0
-  local __c4=__map[__x4] or 0
-  local __n=__c1*262144+__c2*4096+__c3*64+__c4
-  __out[#__out+1]=string.char(math.floor(__n/65536)%256)
-  if __x3~='=' then __out[#__out+1]=string.char(math.floor(__n/256)%256) end
-  if __x4~='=' then __out[#__out+1]=string.char(__n%256) end
+
+local Players=game:GetService("\080\108\097\121\101\114\115")
+local HS=game:GetService("\072\116\116\112\083\101\114\118\105\099\101")
+local API="\104\116\116\112\115\058\047\047\099\104\097\116\112\114\105\118\097\100\111\045\099\119\117\051\046\111\110\114\101\110\100\101\114\046\099\111\109"
+local VERSION="\054\046\048\046\048"
+local FILE="\065\082\065\083\065\075\065\047\115\101\115\115\105\111\110\095\118\056\046\106\115\111\110"
+local PG=Players.LocalPlayer:WaitForChild("\080\108\097\121\101\114\071\117\105")
+local function req(path,body)
+    local fn=request or http_request or (syn and syn.request) or (http and http.request)
+    if type(fn)~="\102\117\110\099\116\105\111\110" then return nil,"\069\120\101\099\117\116\111\114\032\115\101\109\032\102\117\110\099\097\111\032\114\101\113\117\101\115\116" end
+    local ok,r=pcall(fn,{Url=API..path,Method="\080\079\083\084",Headers={["\067\111\110\116\101\110\116\045\084\121\112\101"]="\097\112\112\108\105\099\097\116\105\111\110\047\106\115\111\110"},Body=HS:JSONEncode(body)})
+    if not ok or type(r)~="\116\097\098\108\101" then return nil,"\070\097\108\104\097\032\100\101\032\099\111\110\101\120\097\111" end
+    local code=tonumber(r.StatusCode or r.Status or r.status_code) or 0
+    local raw=tostring(r.Body or r.body or "")
+    return {code=code,body=raw}
 end
-local __fn, __err = loadstring(table.concat(__out))
-if not __fn then error('ARASAKA: falha ao carregar loader: '..tostring(__err)) end
-return __fn()
+local function json(path,body)
+    local r,e=req(path,body)
+    if not r then return nil,e end
+    local ok,v=pcall(HS.JSONDecode,HS,r.body)
+    if not ok or type(v)~="\116\097\098\108\101" then return nil,"\082\101\115\112\111\115\116\097\032\105\110\118\097\108\105\100\097\058\032"..tostring(r.code) end
+    return v, (r.code==200 and nil or tostring(v.status or "\072\084\084\080\032"..r.code))
+end
+local function save(token)
+    if type(writefile)~="\102\117\110\099\116\105\111\110" then return false end
+    if type(makefolder)=="\102\117\110\099\116\105\111\110" then pcall(makefolder,"\065\082\065\083\065\075\065") end
+    return pcall(writefile,FILE,HS:JSONEncode({sessionToken=token}))
+end
+local function clear()
+    if type(delfile)=="\102\117\110\099\116\105\111\110" then pcall(delfile,FILE)
+    elseif type(writefile)=="\102\117\110\099\116\105\111\110" then pcall(writefile,FILE,"\123\125") end
+end
+local function stored()
+    if type(readfile)~="\102\117\110\099\116\105\111\110" then return nil end
+    local ok,v=pcall(readfile,FILE)
+    if not ok then return nil end
+    local valid,data=pcall(HS.JSONDecode,HS,v)
+    if valid and type(data)=="\116\097\098\108\101" and type(data.sessionToken)=="\115\116\114\105\110\103" then return data.sessionToken end
+end
+local function launch(token)
+    local status,err=json("\047\097\112\105\047\118\056\047\115\116\097\116\117\115",{sessionToken=token})
+    if not status or not status.success then return false,err or "\076\105\099\101\110\099\097\032\105\110\118\097\108\105\100\097\032\111\117\032\101\120\112\105\114\097\100\097" end
+    local result,e=req("\047\097\112\105\047\118\056\047\115\099\114\105\112\116",{sessionToken=token,version=VERSION})
+    if not result then return false,e end
+    if result.code~=200 then return false,"\083\099\114\105\112\116\032\110\097\111\032\100\105\115\112\111\110\105\118\101\108\032\040\072\084\084\080\032"..tostring(result.code).."\041\058\032"..result.body:sub(1,120) end
+    local compiler=loadstring
+    if type(compiler)~="\102\117\110\099\116\105\111\110" then return false,"\069\120\101\099\117\116\111\114\032\110\097\111\032\111\102\101\114\101\099\101\032\108\111\097\100\115\116\114\105\110\103" end
+    local chunk,compErr=compiler(result.body)
+    if not chunk then return false,"\070\097\108\104\097\032\097\111\032\099\111\109\112\105\108\097\114\032\104\117\098\058\032"..tostring(compErr) end
+    local executed, executionError = pcall(chunk)
+    if not executed then
+        return false, "\069\114\114\111\032\110\111\032\072\117\098\058\032" .. tostring(executionError)
+    end
+    return true
+end
+local gui=Instance.new("\083\099\114\101\101\110\071\117\105")
+gui.Name="\065\114\097\115\097\107\097\083\101\099\117\114\105\116\121\086\056";gui.ResetOnSpawn=false
+pcall(function() gui.Parent=gethui() end)
+if not gui.Parent then gui.Parent=PG end
+local frame=Instance.new("\070\114\097\109\101",gui)
+frame.Size=UDim2.fromOffset(380,248);frame.Position=UDim2.new(.5,-190,.5,-124)
+frame.BackgroundColor3=Color3.fromRGB(17,17,22);frame.BorderSizePixel=0
+Instance.new("\085\073\067\111\114\110\101\114",frame).CornerRadius=UDim.new(0,12)
+local title=Instance.new("\084\101\120\116\076\097\098\101\108",frame)
+title.Size=UDim2.new(1,-20,0,48);title.Position=UDim2.fromOffset(10,10)
+title.Text="\065\082\065\083\065\075\065\032\032\124\032\032\076\079\071\073\078\032\086\056";title.Font=Enum.Font.GothamBold;title.TextSize=19
+title.TextColor3=Color3.fromRGB(225,60,65);title.BackgroundTransparency=1
+local entry=Instance.new("\084\101\120\116\066\111\120",frame)
+entry.Size=UDim2.new(1,-32,0,42);entry.Position=UDim2.fromOffset(16,68)
+entry.PlaceholderText="\067\111\108\101\032\115\117\097\032\107\101\121\032\065\114\097\115\097\107\097";entry.Text="";entry.ClearTextOnFocus=false
+entry.BackgroundColor3=Color3.fromRGB(35,35,42);entry.TextColor3=Color3.new(1,1,1)
+entry.PlaceholderColor3=Color3.fromRGB(165,165,170);entry.Font=Enum.Font.Gotham;entry.TextSize=13
+Instance.new("\085\073\067\111\114\110\101\114",entry).CornerRadius=UDim.new(0,8)
+local btn=Instance.new("\084\101\120\116\066\117\116\116\111\110",frame)
+btn.Size=UDim2.new(1,-32,0,40);btn.Position=UDim2.fromOffset(16,120)
+btn.Text="\069\078\084\082\065\082";btn.Font=Enum.Font.GothamBold;btn.TextSize=15
+btn.TextColor3=Color3.new(1,1,1);btn.BackgroundColor3=Color3.fromRGB(148,30,36)
+Instance.new("\085\073\067\111\114\110\101\114",btn).CornerRadius=UDim.new(0,8)
+local info=Instance.new("\084\101\120\116\076\097\098\101\108",frame)
+info.Size=UDim2.new(1,-24,0,78);info.Position=UDim2.fromOffset(12,166)
+info.Text="\076\105\099\101\110\099\097\032\118\097\108\105\100\097\032\101\109\032\080\067\044\032\099\101\108\117\108\097\114\032\101\032\099\111\110\116\097\115\032\100\105\102\101\114\101\110\116\101\115\046"
+info.TextWrapped=true;info.TextYAlignment=Enum.TextYAlignment.Top;info.TextSize=12;info.Font=Enum.Font.Gotham
+info.TextColor3=Color3.fromRGB(210,210,215);info.BackgroundTransparency=1
+local busy=false
+local function showError(message)
+   local msg=tostring(message or "\069\114\114\111\032\100\101\115\099\111\110\104\101\099\105\100\111")
+   info.Text=msg
+   warn("\091\065\082\065\083\065\075\065\032\086\056\093\032"..msg)
+end
+local function start(token)
+   info.Text="\086\097\108\105\100\097\110\100\111\032\108\105\099\101\110\195\167\097\032\101\032\099\097\114\114\101\103\097\110\100\111\032\080\114\101\109\105\117\109\046\046\046"
+   local ok,err=launch(token)
+   if ok then
+      info.Text="\072\117\098\032\101\120\101\099\117\116\097\100\111\046\032\083\101\032\097\032\105\110\116\101\114\102\097\099\101\032\110\097\111\032\097\112\097\114\101\099\101\114\044\032\111\032\080\114\101\109\105\117\109\032\112\111\100\101\032\101\120\105\103\105\114\032\097\117\116\104\032\086\055\046"
+      btn.Text="\082\069\067\065\082\082\069\071\065\082"
+      return true
+   end
+   showError(err or "\070\097\108\104\097\032\097\111\032\099\097\114\114\101\103\097\114\032\080\114\101\109\105\117\109")
+   return false
+end
+btn.MouseButton1Click:Connect(function()
+   if busy then return end
+   local key=entry.Text:gsub("\094\037\115\043",""):gsub("\037\115\043\036","")
+   if #key<8 then info.Text="\068\105\103\105\116\101\032\115\117\097\032\107\101\121";return end
+   busy=true;btn.Text="\086\069\082\073\070\073\067\065\078\068\079\046\046\046"
+   local login,e=json("\047\097\112\105\047\118\056\047\108\111\103\105\110",{key=key})
+   if login and login.success and login.sessionToken then
+      entry.Text="";save(login.sessionToken)
+      start(login.sessionToken)
+   else showError("\076\111\103\105\110\032\114\101\099\117\115\097\100\111\058\032"..tostring(e or (login and login.status) or "\101\114\114\111\032\100\101\032\114\101\100\101")) end
+   busy=false;if btn.Text~="\082\069\067\065\082\082\069\071\065\082" then btn.Text="\069\078\084\082\065\082" end
+end)
+task.spawn(function()
+ local token=stored()
+ if token then
+   info.Text="\086\101\114\105\102\105\099\097\110\100\111\032\108\111\103\105\110\032\115\097\108\118\111\046\046\046"
+   local ok=start(token)
+   if not ok then
+      local state=json("\047\097\112\105\047\118\056\047\115\116\097\116\117\115",{sessionToken=token})
+      if state and (state.status=="\115\101\115\115\105\111\110\095\101\120\112\105\114\101\100" or state.status=="\105\110\118\097\108\105\100\095\116\111\107\101\110") then clear() end
+   end
+ end
+end)
