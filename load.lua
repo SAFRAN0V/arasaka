@@ -1,4 +1,4 @@
-
+-- ARASAKA V8 | Loader de diagnostico | ofuscacao sem loadstring na inicializacao
 local Players=game:GetService("\080\108\097\121\101\114\115")
 local HS=game:GetService("\072\116\116\112\083\101\114\118\105\099\101")
 local API="\104\116\116\112\115\058\047\047\099\104\097\116\112\114\105\118\097\100\111\045\099\119\117\051\046\111\110\114\101\110\100\101\114\046\099\111\109"
