@@ -1,145 +1,120 @@
-local Players=game:GetService("\080\108\097\121\101\114\115")
-local HS=game:GetService("\072\116\116\112\083\101\114\118\105\099\101")
-local API="\104\116\116\112\115\058\047\047\099\104\097\116\112\114\105\118\097\100\111\045\099\119\117\051\046\111\110\114\101\110\100\101\114\046\099\111\109"
-local VERSION="\054\046\048\046\049" -- Nova versao independente: configurar hub_versions e publicar payload
-local FILE="\065\082\065\083\065\075\065\047\115\101\115\115\105\111\110\095\118\056\046\106\115\111\110"
-local PG=Players.LocalPlayer:WaitForChild("\080\108\097\121\101\114\071\117\105")
-local gui, frame, info -- forward declarations: acessiveis tambem no launch()
-local hubErrored = false
-local function req(path,body)
-    local fn=request or http_request or (syn and syn.request) or (http and http.request)
-    if type(fn)~="\102\117\110\099\116\105\111\110" then return nil,"\069\120\101\099\117\116\111\114\032\115\101\109\032\102\117\110\099\097\111\032\114\101\113\117\101\115\116" end
-    local ok,r=pcall(fn,{Url=API..path,Method="\080\079\083\084",Headers={["\067\111\110\116\101\110\116\045\084\121\112\101"]="\097\112\112\108\105\099\097\116\105\111\110\047\106\115\111\110"},Body=HS:JSONEncode(body)})
-    if not ok or type(r)~="\116\097\098\108\101" then return nil,"\070\097\108\104\097\032\100\101\032\099\111\110\101\120\097\111" end
-    local code=tonumber(r.StatusCode or r.Status or r.status_code) or 0
-    local raw=tostring(r.Body or r.body or "")
-    return {code=code,body=raw}
-end
-local function json(path,body)
-    local r,e=req(path,body)
-    if not r then return nil,e end
-    local ok,v=pcall(HS.JSONDecode,HS,r.body)
-    if not ok or type(v)~="\116\097\098\108\101" then return nil,"\082\101\115\112\111\115\116\097\032\105\110\118\097\108\105\100\097\058\032"..tostring(r.code) end
-    return v, (r.code==200 and nil or tostring(v.status or "\072\084\084\080\032"..r.code))
-end
-local function save(token)
-    if type(writefile)~="\102\117\110\099\116\105\111\110" then return false end
-    if type(makefolder)=="\102\117\110\099\116\105\111\110" then pcall(makefolder,"\065\082\065\083\065\075\065") end
-    return pcall(writefile,FILE,HS:JSONEncode({sessionToken=token}))
-end
-local function clear()
-    if type(delfile)=="\102\117\110\099\116\105\111\110" then pcall(delfile,FILE)
-    elseif type(writefile)=="\102\117\110\099\116\105\111\110" then pcall(writefile,FILE,"\123\125") end
-end
-local function stored()
-    if type(readfile)~="\102\117\110\099\116\105\111\110" then return nil end
-    local ok,v=pcall(readfile,FILE)
-    if not ok then return nil end
-    local valid,data=pcall(HS.JSONDecode,HS,v)
-    if valid and type(data)=="\116\097\098\108\101" and type(data.sessionToken)=="\115\116\114\105\110\103" then return data.sessionToken end
-end
-local function launch(token)
-    local status,err=json("\047\097\112\105\047\118\056\047\115\116\097\116\117\115",{sessionToken=token})
-    if not status or not status.success then return false,err or "\076\105\099\101\110\099\097\032\105\110\118\097\108\105\100\097\032\111\117\032\101\120\112\105\114\097\100\097" end
-    local result,e=req("\047\097\112\105\047\118\056\047\115\099\114\105\112\116",{sessionToken=token,version=VERSION})
-    if not result then return false,e end
-    if result.code~=200 then return false,"\083\099\114\105\112\116\032\110\097\111\032\100\105\115\112\111\110\105\118\101\108\032\040\072\084\084\080\032"..tostring(result.code).."\041\058\032"..result.body:sub(1,120) end
-    local header = result.body:sub(1, 2400)
-    local scanned = 0
-    for line in (header .. "\n"):gmatch("([^\r\n]*)[\r\n]") do
-        scanned = scanned + 1
-        if scanned > 18 then break end
-        local normalized = line:upper()
-        if normalized:find("\065\082\065\083\065\075\065\032\071\082\065\084\073\083", 1, true)
-           or normalized:find("\065\082\065\083\065\075\065\032\071\082\195\129\084\073\083", 1, true)
-           or normalized:find("\070\082\069\069\095\072\065\076\076\079\087\069\069\078", 1, true) then
-            return false, "\066\076\079\081\085\069\065\068\079\058\032\065\080\073\032\101\110\116\114\101\103\111\117\032\111\032\071\114\097\116\105\115\032\110\111\032\108\117\103\097\114\032\100\111\032\080\114\101\109\105\117\109\046\032\067\111\110\102\105\114\097\032\104\117\098\095\118\101\114\115\105\111\110\115\032\054\046\048\046\049\032\110\111\032\083\117\112\097\098\097\115\101\046"
-        end
-    end
-    if result.body:match("\094\037\115\042\091\123\060\093") then
-        return false, "\082\101\115\112\111\115\116\097\032\105\110\101\115\112\101\114\097\100\097\032\100\097\032\065\080\073\058\032\110\097\111\032\101\032\117\109\032\112\097\121\108\111\097\100\032\080\114\101\109\105\117\109\032\076\117\097\046"
-    end
-    local compiler=loadstring
-    if type(compiler)~="\102\117\110\099\116\105\111\110" then return false,"\069\120\101\099\117\116\111\114\032\110\097\111\032\111\102\101\114\101\099\101\032\108\111\097\100\115\116\114\105\110\103" end
-    local chunk,compErr=compiler(result.body)
-    if not chunk then return false,"\070\097\108\104\097\032\097\111\032\099\111\109\112\105\108\097\114\032\104\117\098\058\032"..tostring(compErr) end
-    hubErrored = false
-    task.spawn(function()
-        local ok, runtimeErr = xpcall(chunk, function(e) return tostring(e) .. '\n' .. tostring(debug and debug.traceback and debug.traceback() or "") end)
-        if not ok then
-            hubErrored = true
-            warn("\091\065\082\065\083\065\075\065\032\086\056\032\072\085\066\032\069\082\082\079\082\093", runtimeErr)
-            if info then info.Text = "\069\082\082\079\032\078\079\032\080\082\069\077\073\085\077\058\032" .. tostring(runtimeErr):sub(1,220) end
-            if frame then frame.Visible = true end
-        end
-    end)
-    return true
-end
-pcall(function()
- local old = (type(gethui)=="\102\117\110\099\116\105\111\110" and gethui():FindFirstChild("\065\114\097\115\097\107\097\083\101\099\117\114\105\116\121\086\056")) or PG:FindFirstChild("\065\114\097\115\097\107\097\083\101\099\117\114\105\116\121\086\056")
- if old then old:Destroy() end
-end)
-gui=Instance.new("\083\099\114\101\101\110\071\117\105")
-gui.Name="\065\114\097\115\097\107\097\083\101\099\117\114\105\116\121\086\056";gui.ResetOnSpawn=false
-pcall(function() gui.Parent=gethui() end)
-if not gui.Parent then gui.Parent=PG end
-frame=Instance.new("\070\114\097\109\101",gui)
-frame.Size=UDim2.fromOffset(360,210);frame.Position=UDim2.new(.5,-180,.5,-105)
-frame.BackgroundColor3=Color3.fromRGB(17,17,22);frame.BorderSizePixel=0
-Instance.new("\085\073\067\111\114\110\101\114",frame).CornerRadius=UDim.new(0,12)
-local title=Instance.new("\084\101\120\116\076\097\098\101\108",frame)
-title.Size=UDim2.new(1,-20,0,48);title.Position=UDim2.fromOffset(10,10)
-title.Text="\065\082\065\083\065\075\065\032\032\124\032\032\076\079\071\073\078\032\086\056";title.Font=Enum.Font.GothamBold;title.TextSize=19
-title.TextColor3=Color3.fromRGB(225,60,65);title.BackgroundTransparency=1
-local entry=Instance.new("\084\101\120\116\066\111\120",frame)
-entry.Size=UDim2.new(1,-32,0,42);entry.Position=UDim2.fromOffset(16,68)
-entry.PlaceholderText="\067\111\108\101\032\115\117\097\032\107\101\121\032\065\114\097\115\097\107\097";entry.Text="";entry.ClearTextOnFocus=false
-entry.BackgroundColor3=Color3.fromRGB(35,35,42);entry.TextColor3=Color3.new(1,1,1)
-entry.PlaceholderColor3=Color3.fromRGB(165,165,170);entry.Font=Enum.Font.Gotham;entry.TextSize=13
-Instance.new("\085\073\067\111\114\110\101\114",entry).CornerRadius=UDim.new(0,8)
-local btn=Instance.new("\084\101\120\116\066\117\116\116\111\110",frame)
-btn.Size=UDim2.new(1,-32,0,40);btn.Position=UDim2.fromOffset(16,120)
-btn.Text="\069\078\084\082\065\082";btn.Font=Enum.Font.GothamBold;btn.TextSize=15
-btn.TextColor3=Color3.new(1,1,1);btn.BackgroundColor3=Color3.fromRGB(148,30,36)
-Instance.new("\085\073\067\111\114\110\101\114",btn).CornerRadius=UDim.new(0,8)
-info=Instance.new("\084\101\120\116\076\097\098\101\108",frame)
-info.Size=UDim2.new(1,-24,0,40);info.Position=UDim2.fromOffset(12,166)
-info.Text="\076\105\099\101\110\099\097\032\118\097\108\105\100\097\032\101\109\032\080\067\044\032\099\101\108\117\108\097\114\032\101\032\099\111\110\116\097\115\032\100\105\102\101\114\101\110\116\101\115\046"
-info.TextWrapped=true;info.TextSize=12;info.Font=Enum.Font.Gotham
-info.TextColor3=Color3.fromRGB(210,210,215);info.BackgroundTransparency=1
-local busy=false
-local function start(token)
-   local ok,err=launch(token)
-   if ok then
-      info.Text="\076\111\103\105\110\032\086\056\032\099\111\110\102\105\114\109\097\100\111\046\032\067\097\114\114\101\103\097\110\100\111\032\080\114\101\109\105\117\109\046\046\046"
-      task.delay(2, function()
-         if not hubErrored and gui and gui.Parent then gui:Destroy() end
-      end)
-      return true
+local _a={}
+_a[14]={69,71,"Kui2M0HHnRZNzityucBLAdadL6qjeSibmVsItns5+bkNHp24Luy2NjLWy0BXomgq7PxMGJHfGK/HNHuCyUISynA+/fpaC8CSWLmofT3Fy0wa2Hp347loG6c="}
+_a[10]={15,102,"YRH7KdN5A/dNwHoEsk7XIGX1G4EnBLUZ63wbtB/7bUCxCLxnEqNQ7ZYKpRa3iQusQbWJBLNY4Zd/q0L923qGUeqWLrVI/9Mq2kirlyLTQOiAdclE9pg2yms="}
+_a[45]={232,244,"yPzwrd6M1O34GVgHNyEwXUR5Yi2G0ceyvdLT0PHj7lNIKDghVgxScXyJgor4qqHY2/m8oz0UBTc9SF9WOGJhm8iztqHKycPxqBAfBTw/NEZBcncj2ImOsMI="}
+_a[15]={80,29,"NQPuraiOnXpUdRT6wqqSak9Teh3n3qDDeEQ2N1D72beJJCBnRKG+17eWc0NsG6rG/a+fZhwhD//A6YCQeEB/ebCN6sdtRx41F+GSvcx9TiYOXejSoIR8RWg="}
+_a[42]={75,20,"Cg86p/7Bt6WOmHxSGyBDMPn+x66oz214C1MmABr9g9Ok/6N1fkIqIgZRs+TUoYWeeX4TLy4N3OHOzaCOlGFQF31xQ6mqj624y6xmV1otAgTusZTN+88jNws="}
+_a[39]={22,222,"Ypy33q4OOE1nj+LFEDgwONb0krBObApkiafD7H5SdYq71f4ZNEluyPuE7glQecCtxuQXIgYl4OiGpEJgPtz60fBUPF98gavE7x4nRMS60/YSfBVRvI35yS0="}
+_a[3]={41,171,"CaUKT/XzTqTgDKLxTLziDrzpD7XwRKnpQvzmQrz6VrLhW6ykP82mFqDYcqzOeay0GYfgVIP5XJPjWcfTbaG8aKzGbKPaDsvmIJ72Yo73MZz8N5/1K5T+NNE="}
+_a[70]={138,215,"7xYQPsqMuFprIpKz8FsOQpm6zw05WGq/8eYMWHzWgdAFLXed9bMSOU2UguA8fR034p27bxo+0pKYIC5kmqTyEC8PlqrRVXN+S5rf9TBQfsSW8xxRP8OH9AA="}
+_a[30]={245,87,"hj/KlT/8kD3IanuPKRTYZQDSP2DhOE/mPVTrAhW5RBu7X+afSfi2ROiXeubJfbedMf2HP9LWI8+eMcVxPPV/Ltx+BslQHJMcTeQ7UukAV+5MD59D571b77A="}
+_a[24]={97,72,"F5SBWuClfXHTjFAdp2A9/M1vOPVEYJv5AUmRkCepv3YViZ5Sob15PM/JQxy1fCP3wUcY1SEs/70rSZHZYeW+egDF0U/gpXg9jY1QDaA0IfqARR2RSRq/k3I="}
+_a[29]={158,22,"+9q8ycsxBV47Chnkz9O8z951RCR2C+fsyaG0hi41G2gxBqr/8cbC2C4EXz4QFeDH0LmPbmICAwov19v7h4OzXUp8FSM5wvb9lrDaLQZHWEhetIrg9swia0s="}
+_a[54]={120,227,"FD8WBkWVq97xGDdqeZyXt8H/FwcMMNP04Mz0SRxoKLOx1frHDTVZebO73/UYd2Vkeoq90P8WCVhDdpSg2PYkbR8y9MGtwaoCPFc2jbTazKUHJ0orsLLJ6fI="}
+_a[60]={38,230,"DiumvcbQxhE0WU4vwrLIwesJezJqbZ6807LRATRRJ1Wipd+qUAovRz7NzuWcpFZQahgq0eWww+QaOWx4YYeztM/jHGVrYGOd5JLE+gE5dUZgn7fMtrVafAc="}
+_a[88]={52,60,"FBXCjC4F8rw9Wg=="}
+_a[40]={253,93,"vHrwRjCaYtvCbr/NdZZnArhPru5hvtt4lTJP7Ammwy/v2jnbYwOqROyYWvjDMNp+CeIAxbN/yLke8y8rm+UCtHTJ0HiRP0foUfCqWbD8c5AtSucEof4buNU="}
+_a[50]={16,249,"fgMi29TNxv/48erjnJXG0sLc4PnrDxMLSFx6Jz4wWz0QCQI7NC0m39jRysOrtLyp6J7p6vbcxc7DwFolVEUWAhJpB2lmYnRCPz0qcYmbmo6NvJe5tpS8j4g="}
+_a[49]={122,205,"FTRgk8cVLz2Gyh48ccPREy43gNQcPn/Lxg0teoPR4S5xx9XvKjuM0OA6e8fC8TF+j9XlMnXDkaU9bcyeoXoAiNTjfSvOm6h1As+cqT9F0NPlIwSe1assTZc="}
+_a[80]={46,98,"XeWQfJE9Cfcahy5D4QGAzG6QexL2G/GZJ/wapJIgz2JOuVzymXbueQaUf4NCAa1F+pVyx2MZ+lf7eUX/VO2eOdx+UrFY/PB8ngDgkTXRNxi8RffPNMx0Uoo="}
+_a[1]={152,133,"tTCCZv5w5XqLBOofhhyTKr0g0jiyzV+rP7o6zGHqe+Fx6RvnGul29E/FJK472T1C2l/XUN0B4XnxYfNszmTjc5kPozStOrdbU8BJ2kbQSvoI+wqXEeEqpDc="}
+_a[5]={28,213,"edbvkRwqeY6ouS8TUdDl/xg1Zpj6ukVcfIjK4xpUZIbY/ktYZ5CJoQtXfIbW6QdFIoLZ5kc/ZrDX6DITXpjg1BV+SOaXs3QfKuiJo3UAIpnD9zcLdrDYDDU="}
+_a[82]={148,199,"/TUMmsUUXWC/4HpAhstWUWus+zcOlMsGT2ql/wxwjcgaG3ah9TkUxYxTGiHo6jhpltJcbWW/+mg7xJECWYmjpTh0hcAeGY2g/yBzjsY7WZah5XsTwIdOFdw="}
+_a[6]={254,179,"kZENea4YQIb4LZnBFnDyW02O+iGTyhVhpwsMt+cnp907Y7ceRbPjY5OJLHqgGUG47zPU1zt0rBxHvYZTncY5Z543bZvPANfiBEjvLmmUp0iL0idu1QN/pb4="}
+_a[52]={201,66,"6W4j69szdbf5O32/wQNFh8lCC4+XQRTanBsJ12QtpaF7KuCqPwX8pHA58boBXoWTWx7Iz1Qd0f0ZW53fYaPlJyzlqQVxs/U3PPW5NmuDxQdJ2YhbBMGbFw0="}
+_a[31]={118,124,"E9JTyhWWP64joWCjNY5X3FPGR8dDgiOnNuZ8/2Ou9FrWUs5KxkL+KbMhvSOpLPtCxlvcT9Vj6jqrMv1+53YLiViBC5kVizG0E6o+ozSnTftCniSKBoI+ujY="}
+_a[63]={153,153,"91GuSpPzWOBGrvZUsRyY6A7uPYbsS9px++9NyCeXqXPQKI65SPImhbM03SmSViacZNFJOJ1q60o4kSayAXzebokdeM1JvwBmnG+XBWisGbYbbfZ7qwCM/UU="}
+_a[36]={70,64,"KeeiKEym5iZmq+smBe6jZS2mrmMn4qN0ZuqvaCP15mko6r8mMunmZzDpr2Jm4KdqNePmayfypW4j9eZvKKaydCfotWon8q9pKPXpUw+msmM+8ugMZqbmJio="}
+_a[43]={209,77,"8T5L3Ws2lcwZpvNFA94NdIHOG+GzAh3ZeiPPhBPouEAIhGY50ZFXpP54VrMnAdzIHKnyCAGqajKj1mOw/QpX5DEszoww4LEMH6d/E8jWZ7OzSwi4ehHbnWk="}
+_a[18]={245,47,"m0Bz7NiML1EfvL+VWiz134tzawSPo4tPKfnIynY6V4GdUGcysefBMD9SyLVtXU6/z5FNNovcsG1cALusjEY08tyLfWICwbmbBSjk0Yx2bnyF9CMSCPafmmQ="}
+_a[83]={120,157,"WGbGLp79Dq8PmvNZ+gJr2DuM7XHoNp32XuRgJ4Rhuxdr0HKG4k+pTVT4QqNJNuIkj+xMny6c9UajDG7IfsFZNZYhnfxYuw9txxW/V3vDbsPkSqU2krlXvRQ="}
+_a[20]={147,65,"47d0OvvwdDvwuXsx84REEI/DZDTmu2gh6ssETsqeVXiT1BVWxZ1ND8mSHQ7cYS3u63M377NtL+OnaWHIhlwUvptHb9yEVxfftX8y+roIGtGGVxbPiEY9xYA="}
+_a[46]={231,196,"x4tPE5vUHCJr6+w7YrX0T0SEwgNyic2+JGSi4z53utFPWYrAAleL7eUka6q+UT/Dh0tGlZcVUHfn6CdmufB/V4/OAROF3gs2daWvNXa37AYLzOkSW5PeoyY="}
+_a[35]={75,51,"elKA1idjXdWNckNcj8I1ZVaOsWYiF8SVfmsWwrNrf1jNv3goV8mxfzATzfxmJFXcs2thNfeTLSEQxbBoWhzRuWdSCISlb0kF0bh6HBvKsCh9HMSxJ0oM2b8="}
+_a[23]={225,228,"gqTFrRcgV351jKbDsQYtUlNgjeWYn1l9YQVgi/HB4A0EbVtokLHf9O0AYFMs0r/Iz+YdJF573v21zewDcUd8iZS3x60fPFU9ZIutp7FVeR1Naoqs3bUWNm0="}
+_a[84]={137,193,"qSZkq+QgIaPlM2eh5n83t+t6PLnvLHDAxQcDlsACQs+ASk6CyWQP0JEQRofMS1GZ1Qlex98KUS6V5ztw+KECRp3YCl7qhCp+tbtZYLTlPDaq6jprs7Y5VY8="}
+_a[48]={238,131,"5FHUV9pdIKMm5WPsc/k49HWNBNVfw0TaW9x5zTDldes2oTe2NrFIgA6cAoRe1R6OEGLwbuVjuHa/Oe561lDaRY5F20TOT6ktoWGpZvJ79nv5PYpAykPeU4I="}
+_a[38]={47,151,"c6h/3bFF1DGTHX2EYfIqVsNEkQqmuACbC5zZcu5oyFhryTf0SyK5EOd+1f9A2z+GGnKNefsBasFZoACYswHhaeWmPZRrwlkwh1ezTHD5UKYxk+kEhXLYuDc="}
+_a[85]={70,190,"JXCr71DUk3IWmN0TT4CKHEmPxw4jr+43ZLH2eCfGqiFg5PYvldkUGILcF17kjEoIj8oET/DIP2CiqXVGq/4jbq/nI27aExqU2RNbno4fS4TQCwzOsHsQ+LY="}
+_a[74]={117,158,"EGvFDILnRrVWPuJQsRRrhHuV40CgOU7lbdGwL5FpyKcZ4UA6hHCA6UOsT738WLIQZ9wkgel/uwZr0DG+D37XNIyuAMUBZMomiaNDyi6CpFG0H2LKR4fmRKQ="}
+_a[71]={101,208,"C1B3h8QRLGCWiNARTJjr+wBCLeWJTWwfjNvjOhi8q+YRVGu2wFsrcJKdogFAjbHZBFdguYJZI2eE2OB8L5yr8wobVrzfEHhAodzoZwuboOJNBCn4l0FpJck="}
+_a[4]={159,66,"/sFTF8iNXg7Onh1/25ZYHNMhE+mmcC7/vCw09Lp8Ydq6VTDAlV8CzooZVOWbWALYjTKk7A0l5K5uPbOdRGT8vHIEmaJCHfiIXQfallJRnLVL9bNWIvu9ZCw="}
+_a[21]={113,240,"FA9sNV5KdG+MyPjL1M/1ix0OMiBdAXd0n4KlqN7PseIdBDAzGQgbIdHB8ajXgeX4AQR5JVRNd2idhPj8jIb39B8CJSheTzYhhYm0r5HR8uAdDXklVE13aJ0="}
+_a[8]={19,203,"fKzeFU1u9cQOVW2t5QNZkazgKh7P2+Y1aJXYCiJ7rogHX2S2+gcVbqS2DU2CrO4wC8ez6CB5hNxbLmS+4gBPZ6H7DRTC6vMBR4WkhjtNjtnvbn+RwRkxebQ="}
+_a[44]={246,115,"nwe5PLJQ2nrqYFSDO+0B42+jLBGTCvgunkTJN/qcCY85qFiPcudtFocUuWf2WME9ofNM/3LlXcV6myRXyn28LNVI8C/hmgWrJ61R1SfhbxKCKrhN20v/AV4="}
+_a[22]={125,43,"GISVt2URVqD1IAt25MCkZ0Q+o9qgdEpy8sKyclQ67t64IQ5jrtKqZFYU4tmPKxcW5d2NLkkH7taJOEwU+MiCdFQE9pKvXXMvueeQa2ZFt6eDfEkL96Dldio="}
+_a[58]={7,8,"NSF5elAHGQprYmZnV0NZSquipq+Shr3Zta66usmtlpxsaGVwUkFTfCgjOC1UUjQQ6+DlrInJxdCqnZCdz97A0zY4Oy0VBgxZNS46OkktGA3j6uXMztXS764="}
+_a[56]={235,54,"1kc24bCcJRX4sGtRW8+qeyj13oJNcablnEQOs4NoTRDFlSoq5s2HUDK57t1WB/v8ASgRjY12O6XchE5zw6iNUAXV93krHMHFfCTuk6NILfCldQo95PlqKx8="}
+_a[77]={229,208,"h/D3J0qHoPFFVGuxhRIwfMXU6zEFkrD8S2Vkp8AbMTWR3eA7BZKw/F9xYKbRBypszZylMEuRz7VFFSX1hRArccy/pXUF1eW1F1BxoNcbZWGXwOBfBdXl8As="}
+_a[57]={235,107,"4TCzTfpnUJEt3W3lgTmgHvVjBvRg9G/pnjvuGPh/HMlB0FPtmgfja8p0HNka/kz9yUi3Tsh/Mo41zUzg11njcIcksNx++UvqYgO8av919pkvr17yOieZId4="}
+_a[81]={241,40,"lGE1VLbvpFt4H8jqkLdlBl+3784bGUGp3bZiSD1ZzaaWcC9F9ISLel43qY7+mFEgXu/5xn1WBuDf/i1SOhzY9Jp8OBS4s8EpETDnib2WRiAfuaCHdRkN5tY="}
+_a[33]={81,169,"I4nKI5ujEbXLEaLbc5umMsGqE/zsSPfuRqZbVqgFaqQFOrcEcNBHYtwWfsYzJsk5bdk20MBuks4t+LtkzbZWjrFIhv9AsvMeuu1PsQMb/UgR6gd0oAA3sgw="}
+_a[51]={159,173,"v2zZhnMgjXonlAhomwF7pAA8vR5Gvl1DueJe8N9dneYf0blhtvIftYcaTo4LWvAvRukkLONXPeRZBKURWKz3W7HrEZTmLpnzKpHkPImBb3HaPiGHTyKPWj4="}
+_a[53]={146,78,"4JVLdq92Ar5yM/+AVqCwURyjejXFlm696BASo3kJ2iQ9zIoct/gOALtgO4SdLeKMR+nnIVefYCHMk0rltUZR5HMOytwt/ZJc97k2RYBOP8qWBueuWQyFfAs="}
+_a[68]={67,42,"NEWwlY5tSyvmyZN+VUKj35FsWgSiv719XXPU2KFgEgzHxLozBTsa3vvMC3xIl+PJD3lHiPCXayddzaiCcjEG9q3QQgUC+I3HdU8I/PSDaUoG+Z/QPRluu4M="}
+_a[76]={248,156,"lrRm9Ehnz1K+HWLBKYDvMpgXkf5aoQed9lC/TFjWJbERYd1ixqoHtnjUsAzoRHT9S79eaM0ogQUwhnzM7lGuP4z9X6JALaoc+FQwjGjEoDzRMtDiR7BAlO0="}
+_a[34]={44,92,"WP2WLryeNdx/DegHL7tG+Zw8hG491zQUpVv0j1LxgjXAKEyISCyEEKvGatSTK8BiBaZDqK5d54Ug3CoD03wR+QKmw2mm2HOeIhqhUwm0QL6OJ8B5ZsthEuQ="}
+_a[16]={149,62,"+7p9Y+jrbCnhySEfXZuVWBbSnQ8CwMVRWNOCfjH38V8GvZtcAsWNYibspZoRM+rbR13TgEkSgO0FQ4H/dD25uXonsaBma+a1JTf4z5gTD56LDlbbjEkFwsI="}
+_a[11]={193,177,"5lJGuuE8x7hp2sczbt8DAL7pH5aoNpTJNWaTCnPiBGWT/n619R8plhl7vxQBk+o0mc03OZI2WJstDffEWI/7NXPBXm+eUWS3506O8jnT+xlhp1R56KFWmOk="}
+_a[78]={142,139,"6hOED5osvj2JX6jiaukVx1G6IK0Dm+cj81PeF60/+ESoGGjne4Ve1Ga9M4Abk686lAmUH7gwlB6E7yzxQ8FLpkS8CotwZ+R1iHzTMqE4qgaK/XvxG/YsojU="}
+_a[2]={87,249,"Pj5pMlRGDU16YT0qcJmYzrKpnfKu5M7Twojg2ceij1NaUCoNNzs8M1oYX0UDeW1rZHWNnZnK/ZnvuLPT3snM7Piw5e0cHQNGOiA4LSYcVA5KRWp/aiSWk5Y="}
+_a[32]={14,163,"LpE1gu5VtuZUugVg3HXFuxm3vADATTCTdoSWH8KlCKcBctU72u8lkPNFuEN3iCqe72nDqEu9GTzAYdPsIZfhW7pWOMwpmNMwj+ZCmx1+3TXD1SuM70P8BXM="}
+_a[27]={1,94,"ayzSdVHwGvKBJoJ9UehW94BL6Ih+m24AtFz+gibJUQyqehPmTfieNt9yRMEJp8VjyJl91XYD9UDljjneekeqUaGxUu/ZJMFyBbpepZoyxmAEzG5brV/wnXE="}
+_a[41]={110,115,"AZN0qVXfTfJqEJY6tn/eQvB1rNAsjxWGaeFdw046vx6LD5MLujys0xKrOdobhWzjmx/ud+odkAO2KVzPQvVoyUvVYfWUTYYyqkrJM7IiOqcRgBHya9lfudY="}
+_a[79]={72,178,"I8DvMX6sEUWsolqbzjFw3wd05Fc6wrRmkcx8bLUBXfb8UonwcHDREm24Eg6F/CD8iHos0h9BteoYgfk3PdcKYroDAor1OoCcP3nJDAj12hObsWvSl0U9/B8="}
+_a[65]={180,41,"ibtnQyvkoLaSUTwOjouTeC8K5NCdf14g49mxdQNkwcS4klR8Vse4nHEXKdXo2icXV7ia6zoYYebCoYxefi3Hs4BeKQP3s9kufwri2JI6HDXh2v7OBGBWkuU="}
+_a[7]={62,142,"EKYphxgjmEzBX6s0xiRFrU7AW7EzlgEuwnPJWaoEjhGH6WiSYaU7lCiT+FvOXa409kuq5HfdV7IJqQPfrx7OX90ttkiR8XuMDto4uQuRrjD3Qtwn9knfoGg="}
+_a[9]={202,66,"pCw89aM8JvmudHLCjUAfgeAMTpDSWBnbm1Bepmx59K17OeujZnT5qjo06pRSO9SNWxnLg0ZU2YoaVM15LKSnZi6svWk8uqR9K+m7UxaNxkcYjMZYBsCGGBs="}
+_a[67]={49,89,"Sf6wVe+LepHKWOJqLsJuBqJ/XaJACf8X3Kt4+58o+op2hmYywXwe6TcxpFYTs13agF76mTajohTAb3XaaBGXKF3yCna5QeSBVbKJMPPLBsZyLtJiBts5Hqw="}
+_a[55]={254,27,"kWAcZkrgzt/clGJDa1cf5sf0rZFpQTEF5cSSuZd6AGQNGubKr4tHbl92RY3FyLHdQEgpOkey8bmHcn1cMz7twMurnXtTE1hcrda5jixPXSAL/evRiYVxXCg="}
+_a[75]={88,154,"NNLqU645gOdHrHyF5Eu2KtDmQ60FlL0k6ELc+l+pBZK4XadKZehG8wRj6VizAizqV7kJaIkw9E4oy1r2H2GESrAXYqxg+lQuiGK1GHbFaoodath7xzZ7ySE="}
+_a[61]={236,253,"3MDsl4mptrL6hauzvPjl/u745fL77IqH2IG+19fS28Gs376kuwkTAxgUQC0HCxZiGTcjPn4LJSkwb3lUTF1TQm5GSkcbaXNjeHQgX219dqyVg5POwdTgk40="}
+_a[47]={157,210,"8k8ifIjH4DdMjfHLACUjy5qhT0dqpN0JJHGW6/YIVHuY3fN6BZKn/2cfMcOV7yxJuL3THDdyjZuwf1diudQcQT3P4bMRVnqwgwwhQoKpsQ1IYYLH7DhH0+Q="}
+_a[72]={35,238,"FyHW1rKn0cq90QAuIk1Oem3MionSxKWrFRMgUGR/YYaGpZecqaVGU2VoJXRln4j7l9Tn+UZOGyxQRGGeivmx1M/4Gwx7LFoFQ0LD/ajcy+DvEC1tXgl0ap0="}
+_a[26]={17,20,"MVFRKA9V+/jFsKuDIXFISTBLCujSxqCyn1F2RiQ7SRj/wbOoj5EDcV4mOAGh89zTspGQYk8VJTwE6/rF6aGGlnRLEEdBVam93aq6jG01WkkwEQz+jdC7r8w="}
+_a[64]={106,191,"Qhjei1AdzakHT5TtJzOM9zt6vf85ebD2IEW19zow68glZa2nNXCloylkuV9/j90IW5LZUA2Q2gdAiJ47S5XYVg3OkwJIkdYaDKLMOn+vyD5irdc5ULr3JmE="}
+_a[13]={218,241,"tKLQgbnJ4R0KMmRRQzdrloS+tNzBuLDkHAdeZRYHOGWViL2hnszP9edOEDooQkV7b4nEr+DsxMDm9gcmOSNdCXV53J/wnLTQ1ub3VQklaEsEaHicmqqjntE="}
+_a[17]={75,6,"ayU/OA1JHRAP9PXjs/f2yYeW5diwuaCmr4DHhJ2PnmlidXYnAw4BG08uNDkhMDECQwNZHuzt6ry7xMnJuZmf5eujsqmWm4HVjS0nJWE3fEpPVAoAcXl/dTo="}
+_a[73]={228,209,"kNT1d0yQrP4eWGCr1fJ8BP6s+AFXJ47OBDlJnaHhElZg6NIFPXzR0uI7QdGExAo3R4zM4mUYyPD1A1hgzvftPVDIg/kdVCSdwxM6Mbeu5gtVaNzOFi91xeg="}
+_a[69]={22,144,"P6xUsjjIImPuUothkyii1Ff0Ef00khgo0EnYMusjmPN7iHCpOJJYQflS3ie7JJnqcp1UsjjIImPuUuUvrAPLtyOsVLI4yCJj7lL1KboJhLUr5VmqOZRFKPg="}
+_a[28]={171,201,"2RFJc732QUyS0PYrO4XbABtrv7Z4ZJjZ5iJ2v4cZV3Sq+DRCjpjuPzO53R5ecqj2OgPN0xEsG/qDTBWSqPM4TsvREzBmqs4EXpmr+ncdyZoPPX2ztw9UjqQ="}
+_a[12]={152,215,"9AYlfICizRd/TY26wqQnHUqw0vRZc0HTisQhC1mdqc4cKg6fu8/7cE0u1JWsQxp4jp/4AjA7naKAGDwFiKra5HBdL6OJrBZYcovbskw3cpSmvwQoUI6gx6A="}
+_a[87]={81,78,"BfCGXufqURyqajPW0E21wxFf7TsA0SUg1Y5J7vlGG6cxLNmaPfLLQPWuaR7KOmiEglr+qEAYq0wE140i64JRpPFrBd5nd8afJO6vA1DncA3V9W27yVLrtys="}
+_a[59]={97,80,"GdRtbJH7CP+SReC/QhTvfwTGKXb0uAL+k1/kowZdp2MA3GR4j7Iu449U84NAFahkEoxUFcicb/+ERqnhDUDzOGvdbjLAnWHliEXttBw4r2IV0G8yxN8v9JY="}
+_a[66]={188,196,"tuUqfL7pekiwwQdNhN8YXJmyxydgv+ZrIaPLBEOCh1ZacqvlHleWsG0W0YRdBsGUTXc04bc1eqzuGQquwx5AxfnuMWXi1jt2qI4jR5jYFVXHpeo8fqm6DHk="}
+_a[25]={20,84,"Wyb4dQfXaAWYQA+ccnGmIHSI3DnC2DrBmCH40CX2iGDgkUz1zFztlFWh4Q2jrE3iuE1b8EUWqAAAsWwV7HwNtHVGz3UXy2UP2lwz22E2hT1pj48k1pEix9M="}
+_a[37]={62,143,"Ua49h1ph/UbSIKZDz6Fi+l3IIK9Em+dz3w+3JoBZMaM+nwj7asByJ7YFlC+9ApETLu5P2iS3DZOmKIQDyHHAT97rc9kapTGJEyX9TZJpuDqPGWnpCpdm90Q="}
+_a[62]={213,90,"oUPszWnyiT/mkDXcf1T8WBqjRvHuGfeZKvKrFO8vU4kgQ/8TUeEEot5L8Ichwi8Z1GwCpG8YpEXhi0vygzTRmifKZwDEKkDBSRC6UuHHJPWBPdA+FNliH6Q="}
+_a[86]={254,83,"3j3LlCvx0Cz91E/7g0f881ruv0IU5CpT5jkF2TIL139+3m933pU1zfxpvM9itchX4YJV6/pe9LJSHPF1Aap2Q5k+BcdjcsY7edqILtaAO7zCOueCSf6JXOg="}
+_a[19]={242,29,"gmoEPhTq1Ni8nnhUZxW1gqSqknpCOh/jjeeQaXtVeAf327mbaAMmPBbk0fGLZUxPQl+8mb+VMFkzF+GJ07qTcFQgAO3DscnAJxAyBODIvIxtcRt5AvvVo8o="}
+local _c="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+local _m={}
+for i=1,#_c do _m[string.sub(_c,i,i)]=i-1 end
+local function _d(t)
+ local x,y,z=t[1],t[2],t[3]
+ local o={} local q=0 local v=0 local j=0
+ for i=1,#z do
+  local c=string.sub(z,i,i)
+  if c=="=" then break end
+  local k=_m[c]
+  if k then
+   v=v*64+k q=q+6
+   if q>=8 then
+    q=q-8
+    local p=math.floor(v/2^q)%256
+    j=j+1
+    o[j]=string.char(bit32.bxor(p,(x+(j-1)*y)%256))
+    v=v%2^q
    end
-   info.Text=tostring(err or "\070\097\108\104\097\032\110\111\032\108\111\103\105\110")
-   return false
-end
-btn.MouseButton1Click:Connect(function()
-   if busy then return end
-   local key=entry.Text:gsub("\094\037\115\043",""):gsub("\037\115\043\036","")
-   if #key<8 then info.Text="\068\105\103\105\116\101\032\115\117\097\032\107\101\121";return end
-   busy=true;btn.Text="\086\069\082\073\070\073\067\065\078\068\079\046\046\046"
-   local login,e=json("\047\097\112\105\047\118\056\047\108\111\103\105\110",{key=key})
-   if login and login.success and login.sessionToken then
-      entry.Text="";save(login.sessionToken)
-      start(login.sessionToken)
-   else info.Text="\076\111\103\105\110\032\114\101\099\117\115\097\100\111\058\032"..tostring(e or (login and login.status) or "\101\114\114\111\032\100\101\032\114\101\100\101") end
-   busy=false;btn.Text="\069\078\084\082\065\082"
-end)
-task.spawn(function()
- local token=stored()
- if token then
-   info.Text="\086\101\114\105\102\105\099\097\110\100\111\032\108\111\103\105\110\032\115\097\108\118\111\046\046\046"
-   local ok=start(token)
-   if not ok then
-      local state=json("\047\097\112\105\047\118\056\047\115\116\097\116\117\115",{sessionToken=token})
-      if state and state.status=="\115\101\115\115\105\111\110\095\101\120\112\105\114\101\100" then clear() end
-   end
+  end
  end
-end)
+ return table.concat(o)
+end
+local _b={}
+for i=1,#_a do _b[i]=_d(_a[i]) end
+local _p=table.concat(_b)
+local _f=loadstring
+if type(_f)~="function" then error("Executor sem loadstring") end
+local _g,_e=_f(_p)
+if not _g then error(_e) end
+return _g()
